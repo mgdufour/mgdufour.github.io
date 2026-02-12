@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>mgdufour — Links</title>
+  <meta name="description" content="Links — mgdufour" />
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#7c3aed; --text:#e6eef8;
+      --muted:#9fb0c8; --radius:14px; --shadow: 0 6px 24px rgba(7,10,20,0.6);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; display:grid; place-items:center; background:
+      radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.08), transparent 6%),
+      radial-gradient(800px 400px at 90% 90%, rgba(14,165,233,0.03), transparent 6%),
+      var(--bg); color:var(--text);
+    }
+    .card{
+      width: min(520px, 92vw); background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius:var(--radius); padding:36px; box-shadow:var(--shadow); text-align:center;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .avatar{
+      width:96px; height:96px; border-radius:50%; margin:0 auto 14px; overflow:hidden;
+      box-shadow:0 6px 18px rgba(0,0,0,0.6); border:4px solid rgba(255,255,255,0.04);
+    }
+    .name{font-size:20px; font-weight:600; margin:6px 0}
+    .bio{color:var(--muted); font-size:14px; margin-bottom:18px}
+    .links{display:flex; flex-direction:column; gap:12px; margin-top:8px}
+    .btn{
+      display:inline-flex; align-items:center; gap:12px; justify-content:center;
+      padding:12px 16px; border-radius:12px; text-decoration:none; color:var(--text);
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
+      border:1px solid rgba(255,255,255,0.03); transition:transform .10s ease, box-shadow .10s;
+    }
+    .btn:hover{ transform:translateY(-4px); box-shadow: 0 12px 30px rgba(7,10,20,0.6) }
+    .btn .icon{width:18px; height:18px; opacity:0.95}
+    .primary{ background: linear-gradient(90deg, var(--accent), #06b6d4); color:white; font-weight:600; }
+    .small{ font-size:13px; color:var(--muted) }
+    footer{ margin-top:18px; font-size:13px; color:var(--muted) }
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f6f8fb; --card:#ffffff; --text:#071023; --muted:#445a6f; --accent:#6d28d9 }
+      body{ background:linear-gradient(180deg,#f6f8fb,#fff) }
+    }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="heading">
+    <div class="avatar" aria-hidden="true">
+      <!-- GitHub avatar (uses your username). Replace if you want a different image. -->
+      <img src="https://github.com/mgdufour.png" alt="mgdufour avatar" style="width:100%;height:100%;object-fit:cover">
+    </div>
+
+    <h1 id="heading" class="name">mgdufour</h1>
+    <p class="bio">Engineer · Open source · coffee enthusiast — choose a link below</p>
+
+    <div class="links" role="list">
+      <!-- EDIT these hrefs to your real links -->
+      <a class="btn primary" href="https://your-site.example" role="listitem" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v20" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        Visit my website
+      </a>
+
+      <a class="btn" href="https://github.com/mgdufour" role="listitem" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.69-3.88-1.54-3.88-1.54-.52-1.34-1.27-1.7-1.27-1.7-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.25 3.33.96.1-.75.4-1.25.72-1.54-2.56-.29-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.15 1.18.91-.25 1.88-.37 2.85-.38.97.01 1.94.13 2.85.38 2.19-1.49 3.15-1.18 3.15-1.18.62 1.57.23 2.73.11 3.02.74.81 1.18 1.84 1.18 3.1 0 4.43-2.71 5.41-5.29 5.69.41.35.78 1.05.78 2.12 0 1.53-.01 2.76-.01 3.13 0 .31.21.68.8.56C20.71 21.39 24 17.08 24 12c0-6.35-5.15-11.5-12-11.5z"/></svg>
+        GitHub
+      </a>
+
+      <a class="btn" href="https://twitter.com/yourhandle" role="listitem" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M22 5.92c-.66.3-1.36.5-2.1.6.76-.46 1.34-1.18 1.61-2.04-.71.42-1.5.72-2.34.88A3.64 3.64 0 0016.5 4c-2 0-3.63 1.63-3.63 3.64 0 .28.03.55.09.81-3.02-.15-5.7-1.6-7.5-3.8-.32.56-.5 1.2-.5 1.88 0 1.3.66 2.45 1.66 3.12-.61-.02-1.18-.19-1.68-.46v.05c0 1.8 1.28 3.3 2.97 3.64-.31.08-.64.12-.98.12-.24 0-.48-.02-.71-.07.48 1.5 1.87 2.6 3.52 2.63A7.3 7.3 0 012 19.58 10.3 10.3 0 006 21c6.04 0 9.34-5 9.34-9.34v-.42C17.9 6.6 20.1 5.4 22 5.92z"/></svg>
+        Twitter
+      </a>
+
+      <a class="btn" href="mailto:you@example.com" role="listitem">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.5v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 7.5l-9 6-9-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Email
+      </a>
+
+      <a class="btn" href="https://your-site.example/resume.pdf" role="listitem" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" opacity=".2"/><path d="M14 3v6h6" /></svg>
+        Resume / CV
+      </a>
+    </div>
+
+    <footer>
+      Built with ❤️ — <a href="https://github.com/mgdufour" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:none">github.com/mgdufour</a>
+    </footer>
+  </main>
+</body>
+</html>
