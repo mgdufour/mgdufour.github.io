@@ -18,6 +18,9 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
 
+    /* sensible default box-sizing so padding and widths behave predictably */
+    *, *::before, *::after { box-sizing: border-box; }
+
     html,body{height:100%}
     body{
       margin:0;
@@ -41,6 +44,9 @@
       box-shadow:var(--shadow);
       text-align:center;
       border:1px solid rgba(15,23,36,0.04);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
     }
 
     .avatar{ width:112px; height:112px; border-radius:50%; margin:0 auto 16px; overflow:hidden;
@@ -50,15 +56,19 @@
     .name{ font-size:20px; font-weight:700; margin:6px 0 4px; letter-spacing:-0.2px; }
     .bio{ font-size:14px; color:var(--muted); margin:0 0 18px; line-height:1.4; }
 
-    .links{ display:flex; flex-direction:column; gap:12px; margin-top:6px; }
+    /* make the links column take full width inside the card and center items */
+    .links{ display:flex; flex-direction:column; gap:12px; margin-top:12px; width:100%; align-items:center; }
 
-    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:12px; padding:10px 14px; width:100%;
+    /* consistent button sizing, alignment and spacing */
+    .btn{ display:flex; align-items:center; justify-content:center; gap:12px; padding:12px 18px; width:100%;
       border-radius:var(--btn-radius); text-decoration:none; color:var(--text); background:linear-gradient(180deg, rgba(15,23,36,0.02), rgba(15,23,36,0.01));
-      border:1px solid rgba(2,6,23,0.04); font-weight:600; font-size:15px; transition:transform .12s ease, box-shadow .12s ease; box-shadow: 0 6px 16px rgba(2,6,23,0.04);
+      border:1px solid rgba(2,6,23,0.04); font-weight:600; font-size:15px; line-height:1; min-height:48px; transition:transform .12s ease, box-shadow .12s ease; box-shadow: 0 6px 16px rgba(2,6,23,0.04);
+      box-sizing:border-box;
     }
     .btn:hover{ transform:translateY(-4px); box-shadow: 0 18px 40px rgba(2,6,23,0.07); }
     .btn.primary{ background: linear-gradient(90deg, var(--accent), #1fa1b6); color:white; border: none; box-shadow: 0 12px 30px rgba(6,182,212,0.14); }
-    .btn.small{ font-size:15px; font-weight:600; }
+    /* small variant keeps same typography but can be narrower if needed (we keep full width here) */
+    .btn.small{ font-size:15px; font-weight:600; padding:12px 18px; }
 
     footer{ margin-top:18px; font-size:12px; color:var(--muted); }
 
