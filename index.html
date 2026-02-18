@@ -1,23 +1,147 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Site</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Michel Dufour — Links</title>
+  <meta name="description" content="Links — Michel Dufour" />
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --accent:#06b6d4;
+      --text:#0f1724;
+      --muted:#64748b;
+      --radius:14px;
+      --btn-radius:9999px;
+      --shadow: 0 10px 30px rgba(2,6,23,0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* sensible default box-sizing so padding and widths behave predictably */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding: calc(40px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom));
+    }
+
+    .wrap{ width:100%; max-width:480px; }
+
+    .card{
+      background:var(--card);
+      border-radius:18px;
+      padding:34px 28px;
+      box-shadow:var(--shadow);
+      text-align:center;
+      border:1px solid rgba(15,23,36,0.04);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    .avatar{ width:112px; height:112px; border-radius:50%; margin:0 auto 16px; overflow:hidden;
+      display:block; box-shadow:0 8px 30px rgba(2,6,23,0.06); border:6px solid rgba(255,255,255,0.9); }
+    .avatar img{width:100%; height:100%; object-fit:cover; display:block}
+
+    .name{ font-size:20px; font-weight:700; margin:6px 0 4px; letter-spacing:-0.2px; }
+    .bio{ font-size:14px; color:var(--muted); margin:0 0 8px; line-height:1.4; }
+    .title{ font-size:13px; color:var(--muted); margin:0 0 18px; font-weight:600; }
+
+    /* icon row — circular badge style (brands use Simple Icons; icons use currentColor) */
+    .icon-row{
+      display:flex;
+      gap:22px;
+      justify-content:center;
+      align-items:center;
+      margin-top:12px;
+      flex-wrap:wrap;
+      width:100%;
+    }
+
+    .icon-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px;
+      border-radius:9999px;
+      background: rgba(2,6,23,0.04);
+      color: var(--muted);
+      text-decoration:none;
+      border: none;
+      box-shadow: none;
+      transition: background .12s ease, color .12s ease, transform .12s ease;
+      box-sizing: border-box;
+    }
+
+    /* use filled SVGs via currentColor */
+    .icon-btn svg{
+      width:32px;
+      height:32px;
+      display:block;
+      fill: currentColor;
+      stroke: none;
+    }
+
+    /* hover: colored circular badge + white icon */
+    .icon-btn:hover{
+      background: linear-gradient(90deg, var(--accent), #1fa1b6);
+      color: #fff;
+      transform: translateY(-4px);
+    }
+
+    /* keep keyboard focus visible */
+    .icon-btn:focus{
+      outline: 3px solid rgba(6,182,212,0.18);
+      outline-offset: 4px;
+    }
+
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    /* make the links column take full width inside the card and center items */
+    .links{ display:flex; flex-direction:column; gap:12px; margin-top:12px; width:100%; align-items:center; }
+
+    /* consistent button sizing, alignment and spacing */
+    .btn{ display:flex; align-items:center; justify-content:center; gap:12px; padding:12px 18px; width:100%; border-radius:var(--btn-radius); text-decoration:none; color:var(--text); background:linear-gradient(180deg, rgba(15,23,36,0.02), rgba(15,23,36,0.01)); border:1px solid rgba(2,6,23,0.04); font-weight:600; font-size:15px; line-height:1; min-height:56px; transition:transform .12s ease, box-shadow .12s ease; box-shadow: 0 6px 16px rgba(2,6,23,0.04); box-sizing:border-box; }
+    .btn:hover{ transform:translateY(-4px); box-shadow: 0 18px 40px rgba(2,6,23,0.07); }
+    .btn.primary{ background: linear-gradient(90deg, var(--accent), #1fa1b6); color:white; border: none; box-shadow: 0 12px 30px rgba(6,182,212,0.14); }
+    .btn.small{ font-size:15px; font-weight:600; padding:12px 18px; }
+
+    footer{ margin-top:18px; font-size:12px; color:var(--muted); }
+
+    @media (max-width:420px){ .card{ padding:26px 18px } .avatar{ width:96px; height:96px } .icon-row{ gap:16px } .icon-btn{ padding:8px } }
+    @media (max-width:640px){ .name { font-size:18px; } .bio  { font-size:15px; } .links { gap:14px; } }
+    @media (prefers-color-scheme: dark){ :root{ --bg:#0b1220; --card:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); --text:#e6eef8; --muted:#9fb0c8; } body{ background:radial-gradient(800px 300px at 10% 10%, rgba(124,58,237,0.06), transparent 6%), var(--bg) } .card{ border:1px solid rgba(255,255,255,0.03) } }
+  </style>
+<head>
 <body>
-    <header>
-        <h1>Welcome to My Site</h1>
-    </header>
-    <div class="icon-row">
-        <a href="https://twitter.com/yourprofile" target="_blank">Twitter</a>
-        <a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
-        <a href="https://facebook.com/yourprofile" target="_blank">Facebook</a>
-        <!-- GitHub icon removed -->
-    </div>
-    <footer>
-        <p>&copy; 2026 My Site</p>
-    </footer>
+  <div class="wrap">
+    <main class="card" role="main" aria-labelledby="heading">
+      <div class="avatar" aria-hidden="true">
+        <img src="https://github.com/mgdufour.png" alt="Michel Dufour avatar">
+      </div>
+
+      <h1 id="heading" class="name">Michel Dufour</h1>
+      <p class="bio">Hello. Bonjour.</p>
+      <p class="title">Innovation and Commercial Services Manager</p>
+
+      <nav class="icon-row" role="navigation" aria-label="Quick links">
+        <!-- ProtonMail (provided SVG) -->
+        <a class="icon-btn" href="mailto:mgdufour@proton.me" aria-label="Email personal">
+          <span class="sr-only">Email</span>
+          <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><title>Proton Mail</title><path d="m15.24 8.998 3.656-3.073v15.81H2.482C1.11 21.735 0 20.609 0 19.223V6.944l7.58 6.38a2.186 2.186 0 0 0 2.871-.042l4.792-4.284h-.003zm-5.456 3.538 1.809-1.616a2.438 2.438 0 0 1-1.178-.533L.905 2.395A.552.552 0 0 0 0 2.826v2.811l8.226 6.923a1.186 1.186 0 0 0 1.558-.024zM23.871 2.463a.551.551 0 0 0-.776-.068l-3.199 2.688v16.653h1.623c1.371 0 2.481-1.127 2.481-2.513V2.824a.551.551 0 0 0-.129-.36z"/></svg>
+        </a>
+      </nav>
+    </main>
+  </div>
 </body>
 </html>
