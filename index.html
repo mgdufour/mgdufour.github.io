@@ -120,8 +120,12 @@
 
     footer{ margin-top:18px; font-size:12px; color:var(--muted); }
 
+    .summary{ text-align:left; width:100%; margin-top:18px; font-size:14px; line-height:1.6; color:var(--muted); }
+    .summary p{ margin:0 0 12px; }
+    .summary p:last-child{ margin-bottom:0; }
+
     @media (max-width:420px){ .card{ padding:20px 16px } .avatar{ width:96px; height:96px } .icon-row{ gap:16px } .icon-btn{ padding:8px } }
-    @media (max-width:640px){ .name { font-size:18px; } .bio  { font-size:15px; } .links { gap:14px; } }
+    @media (max-width:640px){ .name { font-size:18px; } .bio  { font-size:15px; } .links { gap:14px; } .summary { font-size:13px; } }
     @media (prefers-color-scheme: dark){ :root{ --bg:#0b1220; --card:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); --text:#e6eef8; --muted:#9fb0c8; } body{ background:radial-gradient(800px 300px at 10% 10%, rgba(124,58,237,0.06), transparent 6%), var(--bg) } .card{ border:1px solid rgba(255,255,255,0.03) } }
 
     /* reduce the nudge on short screens so it doesn't push content off-screen */
