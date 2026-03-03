@@ -56,8 +56,9 @@
     .avatar img{width:100%; height:100%; object-fit:cover; display:block}
 
     .name{ font-size:20px; font-weight:700; margin:6px 0 4px; letter-spacing:-0.2px; }
-    .bio{ font-size:14px; color:var(--muted); margin:0 0 8px; line-height:1.4; }
-    .title{ font-size:13px; color:var(--muted); margin:0 0 18px; font-weight:600; }
+    /* top intro text (bio + title) — improved readability to match summary */
+    .bio{ font-size:15px; color:var(--muted); margin:0 0 8px; line-height:1.6; max-width:420px; text-align:center; }
+    .title{ font-size:14px; color:var(--muted); margin:0 0 18px; font-weight:600; line-height:1.4; max-width:420px; text-align:center; }
 
     /* left-align the summary content while keeping the card centered */
     .summary{ text-align:left; width:100%; margin-top:12px; max-width:420px; line-height:1.7; font-size:15px; color:var(--text); }
