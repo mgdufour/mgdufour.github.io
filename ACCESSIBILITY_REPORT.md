@@ -68,5 +68,3 @@ Commit references
 
 - Accessibility fixes commit: `15b34f2` (accessibility: add skip link, focus styles, reduced-motion support, improve alt handling)
 - Prior README commit: `69a4251` (new readme)
-
-If you want, I will: move the HTML report into `reports/`, or create a GitHub Action to run Lighthouse on push. Which do you prefer?
