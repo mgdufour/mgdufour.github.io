@@ -43,3 +43,35 @@ This checklist is for this static GitHub Pages site.
 
 - GitHub Pages does not provide full custom response header control for user pages.
 - If you need stronger header control (HSTS, full CSP at header-level, Permissions-Policy), front the site with a service like Cloudflare or move hosting to a platform with configurable headers.
+
+## Latest scan results (2026-03-04)
+
+### Lighthouse (best-practices)
+
+- Target: `https://mgdufour.github.io`
+- Score: `0.96`
+- Report file: `mgdufour.github.io_2026-03-04_10-22-51.report.html`
+
+Key security-related findings:
+
+- `is-on-https`: pass
+- `csp-xss`: pass (informative) with note that CSP is delivered via `<meta>` rather than HTTP response header
+- `has-hsts`: HSTS present, but `includeSubDomains` and `preload` not present
+- `origin-isolation`: no COOP header found
+- `clickjacking-mitigation`: no frame-control policy header found
+- `trusted-types-xss`: no Trusted Types directive in response header CSP
+
+### SecurityHeaders.com
+
+- Target: `https://mgdufour.github.io`
+- Grade: `D`
+
+Observed by scanner:
+
+- Present: `Strict-Transport-Security`
+- Missing: `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+
+### Recommended next step
+
+- Keep current meta-level CSP/referrer controls as baseline.
+- For stronger protection and improved scanner grade, move behind infrastructure that supports custom HTTP response headers (e.g., Cloudflare), then set header-level CSP, frame-control, nosniff, referrer, permissions policy, and optional COOP/COEP.
