@@ -41,6 +41,8 @@ git push --set-upstream origin fix/readme
 
 If this repository is your GitHub Pages site (username.github.io), pushing to `main` (or the repository root) will update the published site.
 
+Security notes and latest scan results are tracked in `SECURITY_CHECKLIST.md`.
+
 License & Contact
 -----------------
 
