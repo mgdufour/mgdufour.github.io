@@ -4,7 +4,9 @@ A personal GitHub Pages site hosting links and notes.
 
 ## Live site
 
-This site is served via GitHub Pages at https://mgdufour.github.io/ (published from the repository root of this `mgdufour.github.io` repository).
+This site is served via GitHub Pages at
+[https://mgdufour.github.io/](https://mgdufour.github.io/), published from the
+repository root of `mgdufour.github.io`.
 
 ## Contents
 
@@ -14,7 +16,8 @@ This site is served via GitHub Pages at https://mgdufour.github.io/ (published f
 
 ## Preview locally
 
-To preview the site locally, run a simple HTTP server from the repository root. In PowerShell or CMD:
+To preview the site locally, run a simple HTTP server from the repository root.
+In PowerShell or Command Prompt:
 
 ```powershell
 py -m http.server 8000
@@ -22,11 +25,11 @@ py -m http.server 8000
 python -m http.server 8000
 ```
 
-Then open http://localhost:8000 in your browser.
+Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ## Contributing
 
-Small content changes can be made via branch + PR workflow. For quick edits you can:
+Small content changes can be made via a branch + PR workflow. For quick edits:
 
 ```powershell
 git checkout -b fix/readme
@@ -36,7 +39,8 @@ git commit -m "Update README"
 git push --set-upstream origin fix/readme
 ```
 
-If this repository is your GitHub Pages site (username.github.io), pushing to `main` (or the repository root) will update the published site.
+If this repository is your GitHub Pages site (`username.github.io`), pushing to
+`main` (repository root) will update the published site.
 
 Security notes and latest scan results are tracked in `SECURITY_CHECKLIST.md`.
 
