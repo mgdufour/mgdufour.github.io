@@ -1,0 +1,65 @@
+name: Lighthouse CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Start local web server
+        run: |
+          python3 -m http.server 8080 --directory . > /tmp/http.log 2>&1 &
+          echo $! > /tmp/http.pid
+          sleep 2
+
+      - name: Run Lighthouse (accessibility)
+        run: |
+          mkdir -p artifacts/lighthouse
+          npx -y lighthouse http://127.0.0.1:8080 \
+            --chrome-flags="--headless" \
+            --only-categories=accessibility \
+            --output=html \
+            --output=json \
+            --output-path=artifacts/lighthouse/accessibility-report \
+            --no-enable-error-reporting \
+            --quiet
+
+      - name: Run Lighthouse (best-practices)
+        run: |
+          npx -y lighthouse http://127.0.0.1:8080 \
+            --chrome-flags="--headless" \
+            --only-categories=best-practices \
+            --output=html \
+            --output=json \
+            --output-path=artifacts/lighthouse/best-practices-report \
+            --no-enable-error-reporting \
+            --quiet
+
+      - name: Stop local web server
+        if: always()
+        run: |
+          if [ -f /tmp/http.pid ]; then
+            kill "$(cat /tmp/http.pid)" || true
+          fi
+
+      - name: Upload Lighthouse artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: artifacts/lighthouse
+          if-no-files-found: error
