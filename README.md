@@ -12,6 +12,7 @@ Contents
 
 - `index.html` — the homepage for the site
 - `commit-reverts.md` — notes and link history
+- `SECURITY_CHECKLIST.md` — security baseline, scan results, and CI policy
 
 Preview locally
 ---------------
