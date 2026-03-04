@@ -75,3 +75,10 @@ Observed by scanner:
 
 - Keep current meta-level CSP/referrer controls as baseline.
 - For stronger protection and improved scanner grade, move behind infrastructure that supports custom HTTP response headers (e.g., Cloudflare), then set header-level CSP, frame-control, nosniff, referrer, permissions policy, and optional COOP/COEP.
+
+## CI policy (Lighthouse)
+
+- Workflow: `.github/workflows/lighthouse.yml`
+- Accessibility threshold is **blocking** in CI (`accessibility >= 1.00`).
+- Best-practices threshold is **advisory only** (`best-practices >= 0.95` emits warnings but does not fail the job).
+- Rationale: keep accessibility quality strict while avoiding unnecessary pipeline failures from non-critical best-practices fluctuations.
