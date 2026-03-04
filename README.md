@@ -46,5 +46,6 @@ Security notes and latest scan results are tracked in `SECURITY_CHECKLIST.md`.
 
 ## License & Contact
 
-This repository contains simple static pages and link notes. If you'd like changes or want to reach me, open an issue or contact the repository owner.
+This repository contains simple static pages and link notes. If you'd like
+changes or want to reach me, open an issue or contact the repository owner.
 

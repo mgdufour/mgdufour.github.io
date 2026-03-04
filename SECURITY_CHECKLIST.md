@@ -74,7 +74,8 @@ Key security-related findings:
 Observed by scanner:
 
 - Present: `Strict-Transport-Security`
-- Missing: `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+- Missing: `Content-Security-Policy`, `X-Frame-Options`,
+  `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
 
 ### Recommended next step
 
