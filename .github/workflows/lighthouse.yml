@@ -49,6 +49,55 @@ jobs:
             --no-enable-error-reporting \
             --quiet
 
+          - name: Enforce minimum Lighthouse scores
+          run: |
+            python3 - << 'PY'
+            import glob
+            import json
+            import sys
+
+            thresholds = {
+              "accessibility": 1.0,
+              "best-practices": 0.95,
+            }
+
+            patterns = {
+              "accessibility": "artifacts/lighthouse/*accessibility*.json",
+              "best-practices": "artifacts/lighthouse/*best-practices*.json",
+            }
+
+            failures = []
+
+            for category, threshold in thresholds.items():
+              matches = sorted(glob.glob(patterns[category]))
+              if not matches:
+                failures.append(f"{category}: report JSON not found")
+                continue
+
+              report_path = matches[0]
+              with open(report_path, encoding="utf-8") as f:
+                report = json.load(f)
+
+              score = report.get("categories", {}).get(category, {}).get("score")
+              if score is None:
+                failures.append(f"{category}: score missing in {report_path}")
+                continue
+
+              print(f"{category}: score={score:.2f}, required>={threshold:.2f}")
+              if score < threshold:
+                failures.append(
+                  f"{category}: score {score:.2f} is below threshold {threshold:.2f}"
+                )
+
+            if failures:
+              print("\nLighthouse score gate failed:")
+              for failure in failures:
+                print(f"- {failure}")
+              sys.exit(1)
+
+            print("\nLighthouse score gate passed.")
+            PY
+
       - name: Stop local web server
         if: always()
         run: |
