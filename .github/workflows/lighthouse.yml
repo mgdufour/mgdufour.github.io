@@ -49,71 +49,71 @@ jobs:
             --no-enable-error-reporting \
             --quiet
 
-          - name: Enforce minimum Lighthouse scores
-          run: |
-            python3 - << 'PY'
-            import glob
-            import json
-            import sys
+      - name: Enforce minimum Lighthouse scores
+        run: |
+          python3 - << 'PY'
+          import glob
+          import json
+          import sys
 
-              blocking_thresholds = {
-                "accessibility": 1.0,
-              }
+          blocking_thresholds = {
+            "accessibility": 1.0,
+          }
 
-              advisory_thresholds = {
-                "best-practices": 0.95,
-              }
+          advisory_thresholds = {
+            "best-practices": 0.95,
+          }
 
-            patterns = {
-              "accessibility": "artifacts/lighthouse/*accessibility*.json",
-              "best-practices": "artifacts/lighthouse/*best-practices*.json",
-            }
+          patterns = {
+            "accessibility": "artifacts/lighthouse/*accessibility*.json",
+            "best-practices": "artifacts/lighthouse/*best-practices*.json",
+          }
 
-              failures = []
-              advisories = []
+          failures = []
+          advisories = []
 
-              for category, threshold in {**blocking_thresholds, **advisory_thresholds}.items():
-              matches = sorted(glob.glob(patterns[category]))
-              if not matches:
-                  if category in blocking_thresholds:
-                    failures.append(f"{category}: report JSON not found")
-                  else:
-                    advisories.append(f"{category}: report JSON not found")
-                continue
+          for category, threshold in {**blocking_thresholds, **advisory_thresholds}.items():
+            matches = sorted(glob.glob(patterns[category]))
+            if not matches:
+              if category in blocking_thresholds:
+                failures.append(f"{category}: report JSON not found")
+              else:
+                advisories.append(f"{category}: report JSON not found")
+              continue
 
-              report_path = matches[0]
-              with open(report_path, encoding="utf-8") as f:
-                report = json.load(f)
+            report_path = matches[0]
+            with open(report_path, encoding="utf-8") as f:
+              report = json.load(f)
 
-              score = report.get("categories", {}).get(category, {}).get("score")
-              if score is None:
-                  if category in blocking_thresholds:
-                    failures.append(f"{category}: score missing in {report_path}")
-                  else:
-                    advisories.append(f"{category}: score missing in {report_path}")
-                continue
+            score = report.get("categories", {}).get(category, {}).get("score")
+            if score is None:
+              if category in blocking_thresholds:
+                failures.append(f"{category}: score missing in {report_path}")
+              else:
+                advisories.append(f"{category}: score missing in {report_path}")
+              continue
 
-              print(f"{category}: score={score:.2f}, required>={threshold:.2f}")
-              if score < threshold:
-                  message = f"{category}: score {score:.2f} is below threshold {threshold:.2f}"
-                  if category in blocking_thresholds:
-                    failures.append(message)
-                  else:
-                    advisories.append(message)
+            print(f"{category}: score={score:.2f}, required>={threshold:.2f}")
+            if score < threshold:
+              message = f"{category}: score {score:.2f} is below threshold {threshold:.2f}"
+              if category in blocking_thresholds:
+                failures.append(message)
+              else:
+                advisories.append(message)
 
-              if advisories:
-                print("\nLighthouse advisory findings (non-blocking):")
-                for advisory in advisories:
-                  print(f"::warning::{advisory}")
+          if advisories:
+            print("\nLighthouse advisory findings (non-blocking):")
+            for advisory in advisories:
+              print(f"::warning::{advisory}")
 
-            if failures:
-              print("\nLighthouse score gate failed:")
-              for failure in failures:
-                print(f"- {failure}")
-              sys.exit(1)
+          if failures:
+            print("\nLighthouse score gate failed:")
+            for failure in failures:
+              print(f"- {failure}")
+            sys.exit(1)
 
-            print("\nLighthouse score gate passed.")
-            PY
+          print("\nLighthouse score gate passed.")
+          PY
 
       - name: Stop local web server
         if: always()
