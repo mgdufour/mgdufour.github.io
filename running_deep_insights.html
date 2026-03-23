@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michel – Deep Running Insights</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d0d12;color:#e0e0ea;min-height:100vh}
+header{background:linear-gradient(135deg,#fc4c02,#b53700);padding:24px 32px;display:flex;align-items:center;gap:14px}
+header svg{width:36px;height:36px;fill:white;opacity:.9}
+header h1{font-size:1.5rem;font-weight:800;color:#fff}
+header p{color:rgba(255,255,255,.75);font-size:.85rem;margin-top:2px}
+.container{max-width:1300px;margin:0 auto;padding:24px}
+.ins-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:24px}
+.ins{background:#141420;border:1px solid #222235;border-radius:12px;padding:14px 16px;border-left:3px solid #fc4c02}
+.ins .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:#555;margin-bottom:5px}
+.ins .val{font-size:1.35rem;font-weight:800;color:#fc4c02}
+.ins .sub{font-size:.75rem;color:#777;margin-top:3px}
+.sec{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:#444;margin:26px 0 12px;padding-bottom:5px;border-bottom:1px solid #1a1a24}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:#141420;border:1px solid #222235;border-radius:12px;padding:18px}
+.card.wide{grid-column:1/-1}
+.card h2{font-size:.8rem;font-weight:600;color:#aaa;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
+.cw{position:relative}
+.narrative{background:#0f1820;border:1px solid #1a2840;border-radius:12px;padding:16px 20px;margin-bottom:18px;line-height:1.75;font-size:.87rem;color:#aabbc8}
+.narrative strong{color:#fc4c02}
+.narrative .g{color:#2ecc71}.narrative .w{color:#f39c12}.narrative .b{color:#e74c3c}
+.tag{display:inline-block;background:#fc4c0222;color:#fc4c02;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-right:5px;vertical-align:middle}
+.tbl{width:100%;border-collapse:collapse;font-size:.79rem}
+.tbl th{color:#444;font-weight:500;padding:5px 8px;border-bottom:1px solid #1e1e2a;text-align:left;font-size:.68rem;text-transform:uppercase}
+.tbl td{padding:7px 8px;border-bottom:1px solid #171720}
+.tbl tr:last-child td{border:none}
+.hl{color:#fc4c02;font-weight:700}.gd{color:#2ecc71;font-weight:600}.dm{color:#444}
+.bdg{display:inline-block;font-size:.62rem;padding:1px 5px;border-radius:6px;font-weight:700;margin-left:3px;background:#fc4c0230;color:#fc4c02}
+@media(max-width:800px){.g2,.g3{grid-template-columns:1fr}.card.wide{grid-column:1}}
+
+.report-card{background:#130a0a;border:1px solid #3a1a1a;border-radius:12px;overflow:hidden}
+.report-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;cursor:pointer;font-size:.85rem;font-weight:600;color:#e0e0e0;user-select:none;transition:background .15s}
+.report-header:hover{background:#1a0d0d}
+.report-chevron{transition:transform .25s;font-size:.75rem;color:#e74c3c}
+.report-card.open .report-chevron{transform:rotate(180deg)}
+.report-body{display:none;padding:20px 24px;border-top:1px solid #2a1010}
+.report-card.open .report-body{display:block}
+.report-section{margin-bottom:4px}
+.report-section h3{font-size:.85rem;font-weight:700;color:#e0e0e0;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.report-section p{font-size:.83rem;line-height:1.75;color:#aab8c8}
+.report-divider{border:none;border-top:1px solid #1e1020;margin:18px 0}
+.report-tbl{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:8px}
+.report-tbl th{text-align:left;color:#555;font-weight:500;padding:5px 10px;border-bottom:1px solid #2a1a1a;font-size:.7rem;text-transform:uppercase}
+.report-tbl td{padding:6px 10px;border-bottom:1px solid #18100f;color:#99aabb}
+.report-tbl tr:last-child td{border:none}
+.badge-red{display:inline-block;background:#e74c3c33;color:#e74c3c;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:6px}
+.badge-orange{display:inline-block;background:#e67e2233;color:#e67e22;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:6px}
+.badge-yellow{display:inline-block;background:#f39c1233;color:#f39c12;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:6px}
+.bad{color:#e74c3c}.warn{color:#f39c12}.good{color:#2ecc71}
+.injury-box{background:#130a0a;border:1px solid #3a1a1a;border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.tag-injury{display:inline-block;background:#e74c3c33;color:#e74c3c;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-right:5px}
+.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.risk-card{border-radius:10px;padding:14px;font-size:.8rem;line-height:1.6;color:#bbb}
+.risk-card.red{background:#1a0d0d;border:1px solid #5a2020}
+.risk-card.orange{background:#1a1208;border:1px solid #5a3a10}
+.risk-card.yellow{background:#13130a;border:1px solid #4a4a18}
+.risk-icon{font-size:1.4rem;margin-bottom:6px}
+.risk-title{font-weight:700;font-size:.82rem;color:#e0e0e0;margin-bottom:5px}
+.risk-card strong{color:#fc4c02}
+@media(max-width:900px){.risk-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.risk-grid{grid-template-columns:1fr}}
+
+.sec-wrap{margin-bottom:4px}
+.sec{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;padding-right:6px;transition:opacity .15s}
+.sec:hover{opacity:.8}
+.sec-chevron{font-size:.7rem;transition:transform .25s;opacity:.6;flex-shrink:0;margin-left:8px}
+.sec-wrap.open .sec-chevron{transform:rotate(180deg)}
+.sec-body{overflow:hidden;transition:none}
+.sec-wrap:not(.open) .sec-body{display:none}
+</style>
+</head>
+<body>
+<header>
+  <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+  <div><h1>Deep Running Insights — Michel Dufour</h1>
+  <p>Advanced analytics · Training load · Biomechanics · Performance trends · 2021–2026</p></div>
+</header>
+
+<div class="container">
+
+<div class="ins-strip">
+  <div class="ins"><div class="lbl">Total Runs</div><div class="val">280</div><div class="sub">Jan 2021 – Mar 2026</div></div>
+  <div class="ins"><div class="lbl">Total Distance</div><div class="val">2,318 km</div><div class="sub">221 hours of running</div></div>
+  <div class="ins"><div class="lbl">Best Effort</div><div class="val">RE 395</div><div class="sub">Army Run · Sep 21, 2025</div></div>
+  <div class="ins"><div class="lbl">Longest Run</div><div class="val">23.2 km</div><div class="sub">Aug 24, 2025</div></div>
+  <div class="ins"><div class="lbl">Fastest Pace</div><div class="val">4:19/km</div><div class="sub">Sep 15, 2025 · 5.7km</div></div>
+  <div class="ins"><div class="lbl">Marathon Goal</div><div class="val">May 24</div><div class="sub">Ottawa · 9 weeks out</div></div>
+</div>
+
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#e74c3c;color:#e74c3c">🦵 KNEE INJURY ANALYSIS — October 2025<span class="sec-chevron" style="color:#e74c3c">▼</span></div>
+  <div class="sec-body">
+<div class="injury-box" id="injury-narrative">
+  <p style="margin-bottom:10px"><span class="tag-injury">ROOT CAUSE ANALYSIS</span>
+  <span style="font-size:.72rem;color:#777;margin-left:8px">Based on training load data · Not a medical diagnosis</span></p>
+
+  <div class="risk-grid">
+    <div class="risk-card red">
+      <div class="risk-icon">⚠️</div>
+      <div class="risk-title">5-Day Peak Block</div>
+      <div class="risk-body">Aug 24–28: 66km across 5 days including the Glen Tay Block Race. Critically, the Aug 25 run was logged as <em>"Tired Run"</em> yet executed at <strong>4:52/km — tempo effort</strong>. Fatigue was being felt but not acted on. Every day featured a race-pace effort with only 1-day gaps. Week 35: <strong>63.5km / load 2,489</strong> — all-time high.</div>
+    </div>
+    <div class="risk-card red">
+      <div class="risk-icon">🏁</div>
+      <div class="risk-title">Army Run — Max Effort</div>
+      <div class="risk-body">Sep 21: 21.3km @ 4:33/km, HR 167, effort <strong>395</strong> — the single highest effort score in your entire history. This was a maximal race on heavily fatigued legs, only 3 weeks after the August peak block.</div>
+    </div>
+    <div class="risk-card orange">
+      <div class="risk-icon">🔁</div>
+      <div class="risk-title">No Post-Race Recovery</div>
+      <div class="risk-body">In the 8 days after the Army Run you ran 46km including a 15.7km long run just 7 days post-race. Standard guidance: 1 easy day per mile raced (~13 days), no hard running for 2 weeks.</div>
+    </div>
+    <div class="risk-card orange">
+      <div class="risk-icon">📈</div>
+      <div class="risk-title">Sustained High Volume</div>
+      <div class="risk-body">You ran 30–65km/week for 14 consecutive weeks (Jun–Sep) with <strong>no true recovery week below 25km</strong>. Cumulative fatigue built silently even as the ACWR ratio looked safe.</div>
+    </div>
+    <div class="risk-card yellow">
+      <div class="risk-icon">📊</div>
+      <div class="risk-title">ACWR Blind Spot</div>
+      <div class="risk-body">Weekly load ratios stayed 0.9–1.2 (safe zone) throughout. But ACWR measures volume, not density. The clustering of back-to-back hard days within weeks was the hidden stressor.</div>
+    </div>
+    <div class="risk-card yellow">
+      <div class="risk-icon">🚶</div>
+      <div class="risk-title">Running Through Pain</div>
+      <div class="risk-body">Oct 28 final entry: 6km at <strong>7:55/km with HR 104</strong> — nearly walking pace. This strongly suggests you continued running through the injury rather than stopping at first symptoms.</div>
+    </div>
+  </div>
+</div>
+
+<div class="report-card" style="margin-bottom:16px">
+  <div class="report-header" onclick="this.parentElement.classList.toggle('open')">
+    <span>📄 Full Written Report — Detailed Injury Analysis</span>
+    <span class="report-chevron">▼</span>
+  </div>
+  <div class="report-body">
+
+    <div class="report-section">
+      <h3>What the data shows happened</h3>
+      <p>Training collapsed at <strong>Week 43 (Oct 20–26)</strong> — just 6.4km in a single run. The final entry before the long silence is October 28: <span class="bad">6km at 7:55/km with a heart rate of only 104 bpm</span>. That's near walking pace, and almost certainly running through pain.</p>
+    </div>
+
+    <div class="report-divider"></div>
+
+    <div class="report-section">
+      <h3><span class="badge-red">PRIMARY</span> 1 — The 5-day August peak block</h3>
+      <p>The five days of August 24–28 looked like this:</p>
+      <table class="report-tbl">
+        <tr><th>Date</th><th>Run</th><th>Effort</th><th>Load</th></tr>
+        <tr><td>Aug 24</td><td>23.2km long run</td><td class="bad">245</td><td class="bad">800</td></tr>
+        <tr><td>Aug 25</td><td>"Tired Run" 12.1km <span style="color:#e67e22;font-size:.8em;font-weight:600">@ 4:52/km ← tempo pace despite fatigue label</span></td><td class="warn">176</td><td class="warn">505</td></tr>
+        <tr><td>Aug 27</td><td>16.0km Speed Repeats</td><td class="bad">227</td><td class="bad">649</td></tr>
+        <tr><td>Aug 28</td><td>Glen Tay Block Race, 14.7km @ 4:25/km</td><td class="bad">223</td><td class="bad">606</td></tr>
+      </table>
+      <p style="margin-top:10px">That's <strong>66km of racing-level intensity in 5 days</strong>, with only 1-day gaps between each effort. Week 35 was the all-time highest: <span class="bad">63.5km, training load 2,489</span>.</p>
+      <p style="margin-top:8px;background:#1a1005;border-left:3px solid #e67e22;padding:8px 12px;border-radius:0 6px 6px 0;font-size:.82rem;color:#bbb">
+        <strong style="color:#e67e22">⚠️ Behavioural flag:</strong> The "Tired Run" label suggests your body was signalling overload — but the execution (4:52/km) was a hard tempo effort, not recovery. This mismatch between perceived fatigue and actual pacing is a key warning pattern. A genuine recovery run at that stage should have been 6:30–7:00/km.
+      </p>
+    </div>
+
+    <div class="report-divider"></div>
+
+    <div class="report-section">
+      <h3><span class="badge-red">PRIMARY</span> 2 — The Army Run was a maximal race on exhausted legs</h3>
+      <p>September 21: 21.3km @ 4:33/km, HR 167 bpm, effort score <span class="bad">395</span> — the single highest effort score in the entire dataset, more than 60% higher than any other run. This was a 100% race effort delivered only 3 weeks after the August peak block, with no real taper (the week before was still 32.5km).</p>
+      <p style="margin-top:8px;background:#071207;border-left:3px solid #27ae60;padding:8px 12px;border-radius:0 6px 6px 0">
+        <strong style="color:#27ae60">📟 Garmin confirmed: PRIME condition on race day.</strong> Training Readiness = <strong style="color:#27ae60">100 / PRIME</strong>, HRV 59 ms, Sleep 93 — your watch showed you at absolute peak. This is why the effort felt possible. But PRIME readiness doesn't mean unlimited — it means you were capable of a maximal output, which is exactly what happened. The crash that followed was proportional to the peak.
+      </p>
+    </div>
+
+    <div class="report-divider"></div>
+
+    <div class="report-section">
+      <h3><span class="badge-orange">CONTRIBUTING</span> 3 — No recovery after the race</h3>
+      <p>In the 8 days following the Army Run:</p>
+      <table class="report-tbl">
+        <tr><th>Date</th><th>Run</th><th>Distance</th></tr>
+        <tr><td>Sep 24</td><td>Evening Run</td><td>7.5km</td></tr>
+        <tr><td>Sep 26</td><td>Morning Run</td><td>9.5km</td></tr>
+        <tr><td>Sep 27</td><td>Afternoon Run</td><td>6.8km</td></tr>
+        <tr><td>Sep 28</td><td>Long Run</td><td class="bad">15.7km ← 7 days post-race</td></tr>
+        <tr><td>Sep 29</td><td>Lunch Run – Base</td><td>6.8km</td></tr>
+      </table>
+      <p style="margin-top:10px"><span class="bad">46km in 8 days</span> after the hardest race ever. Standard guidance: 1 easy day per mile raced (~13 days), no hard running for 2 weeks.</p>
+      <p style="margin-top:8px;background:#0d0505;border-left:3px solid #e74c3c;padding:8px 12px;border-radius:0 6px 6px 0;font-size:13px">
+        <strong style="color:#e74c3c">📟 Garmin readiness crash after the race:</strong><br>
+        <span style="color:#aaa;line-height:2">
+          Sep 21 (race day): <strong style="color:#27ae60">PRIME (100)</strong> →
+          Oct 2: <strong style="color:#e67e22">LOW (31)</strong> →
+          Oct 5: <strong style="color:#e74c3c">POOR (1)</strong> →
+          Oct 13: <strong style="color:#e74c3c">POOR (1)</strong>
+        </span><br>
+        <span style="color:#777;font-size:12px">The body went from peak condition to total depletion in 14 days. A score of 1/100 is the watch saying: stop. Instead, 46km was logged in that window.</span>
+      </p>
+    </div>
+
+    <div class="report-divider"></div>
+
+    <div class="report-section">
+      <h3><span class="badge-orange">CONTRIBUTING</span> 4 — 14 consecutive high-volume weeks with no true rest</h3>
+      <p>From June through September: 30–65km every single week. <strong>No recovery week below 25km</strong> in the entire 14-week stretch. Cumulative fatigue builds silently even when individual weeks look manageable.</p>
+      <table class="report-tbl">
+        <tr><th>Week</th><th>Distance</th><th>Load</th></tr>
+        <tr><td>W28</td><td>38.3km</td><td>1,356</td></tr>
+        <tr><td>W29</td><td>43.5km</td><td>1,599</td></tr>
+        <tr><td>W30</td><td>44.9km</td><td>1,651</td></tr>
+        <tr><td>W32</td><td>54.2km</td><td>1,946</td></tr>
+        <tr><td>W34</td><td>49.6km</td><td>1,828</td></tr>
+        <tr><td><strong>W35</strong></td><td class="bad"><strong>63.5km</strong></td><td class="bad"><strong>2,489 ← all-time peak</strong></td></tr>
+        <tr><td>W40</td><td class="warn">46.8km</td><td class="warn">1,577 — still high, week after race</td></tr>
+      </table>
+    </div>
+
+    <div class="report-divider"></div>
+
+    <div class="report-section">
+      <h3><span class="badge-yellow">AGGRAVATING</span> 5 — ACWR missed it. HRV caught it.</h3>
+      <p>The 4-week vs 8-week load ratio stayed in the safe <strong>0.9–1.2 range</strong> throughout — it never triggered a warning. ACWR measures volume, not density, so the clustering of back-to-back race-pace efforts within each week was invisible to it.</p>
+      <p style="margin-top:8px">Garmin's biological sensors told a different story. HRV declined steadily from ~59ms (Army Run day) to 48ms (Oct 28) — a <strong>19% drop over 37 days</strong> while training continued. In October alone: <strong>11 of 28 days were rated LOW or POOR readiness</strong> (Oct 2, 3, 5, 6, 8, 10, 12, 13, 14, 27, 28). The body sent the signal repeatedly. It wasn't acted on.</p>
+      <p style="margin-top:8px;font-size:12px;color:#555">This is why the 2026 plan uses both ACWR <em>and</em> HRV as injury guards — neither alone is sufficient. ACWR catches load spikes; HRV catches cumulative fatigue that volume metrics miss.</p>
+    </div>
+
+    <div class="report-divider"></div>
+
+    <div class="report-section">
+      <h3><span class="badge-yellow">AGGRAVATING</span> 6 — Running through the injury</h3>
+      <p>The last few October entries show pace degrading while volume continues:</p>
+      <table class="report-tbl">
+        <tr><th>Date</th><th>Pace</th><th>HR</th><th>Run</th><th>Garmin Readiness</th></tr>
+        <tr><td>Oct 12</td><td>5:50/km</td><td>149</td><td>16km long run</td><td class="warn">LOW (25) · HRV 52ms</td></tr>
+        <tr><td>Oct 13</td><td>—</td><td>—</td><td>rest day</td><td class="bad">POOR (1) · HRV 52ms</td></tr>
+        <tr><td>Oct 15</td><td>6:07/km</td><td>139</td><td>slowing down</td><td>MODERATE (60)</td></tr>
+        <tr><td>Oct 17</td><td>5:20/km</td><td>141</td><td class="warn">Tempo — pushing hard</td><td class="good">HIGH (78) · HRV 57ms</td></tr>
+        <tr><td>Oct 25</td><td>4:59/km</td><td>135</td><td>brief run</td><td>MODERATE (74)</td></tr>
+        <tr><td>Oct 27</td><td>—</td><td>—</td><td>rest day</td><td class="warn">LOW (38) · HRV 49ms ↓</td></tr>
+        <tr><td>Oct 28</td><td class="bad">7:55/km</td><td class="good">104</td><td class="bad">near walking — injury</td><td class="warn">LOW (42) · HRV 48ms</td></tr>
+      </table>
+      <p style="margin-top:10px">The Oct 17 tempo was run on HIGH readiness — the short-term recovery window fooled the watch. But HRV had been declining steadily (57→52→48ms across October), exposing the cumulative damage the daily score couldn't fully capture. By Oct 28 the body had simply shut it down.</p>
+    </div>
+
+    <div class="report-divider"></div>
+
+    <div class="report-section">
+      <h3>Summary</h3>
+      <p>A brutal 5-day block in late August → fatigue signals ignored (running "Tired Run" at tempo pace) → maximal race effort (Army Run) 3 weeks later with no taper → resuming 46km in the 8 days after the race → no recovery week in 14 weeks → continued pushing into October. Six compounding stressors on the same legs with no meaningful window to adapt between them. The injury became unavoidable roughly <strong>3–4 weeks after the Army Run</strong>.</p>
+      <p style="margin-top:10px;background:#07120a;border-left:3px solid #27ae60;padding:10px 14px;border-radius:0 6px 6px 0">
+        <strong style="color:#27ae60">📟 The complete biological arc — confirmed by Garmin:</strong><br><br>
+        <span style="color:#aaa;font-size:13px;line-height:2.2">
+          Apr 2025: VO₂max peaks at <strong style="color:#eee">58</strong> — highest fitness ever recorded<br>
+          Sep 21 (Army Run): VO₂max <strong style="color:#eee">52</strong> · Readiness <strong style="color:#27ae60">PRIME (100)</strong> · Marathon prediction <strong style="color:#eee">3:25</strong> — peak race day<br>
+          Oct 5 (14 days later): Readiness <strong style="color:#e74c3c">POOR (1)</strong> · 46km logged since the race<br>
+          Oct 13 (22 days later): Readiness <strong style="color:#e74c3c">POOR (1)</strong> · Training continues<br>
+          Oct 28: Readiness <strong style="color:#e67e22">LOW (42)</strong> · HRV <strong style="color:#e74c3c">48ms</strong> (−19% from race day) · 7:55/km — body stops<br>
+          Mar 2026: VO₂max <strong style="color:#eee">50</strong> · Marathon prediction <strong style="color:#eee">3:51</strong> — recovering, 8 points below peak
+        </span>
+      </p>
+      <p style="margin-top:10px">Cross-analysis with a second AI (Gemini) independently verified the August block data and identified the <strong>"Tired Run" behavioural flag</strong>. The thread connecting every stressor is the same: signals were sent — by your own training labels, by the pace data, by the HRV, by the readiness score — and each was overridden. The 2026 plan makes both ACWR and HRV non-negotiable guardrails.</p>
+      <p style="margin-top:10px;font-size:.78rem;color:#555;font-style:italic">This is data analysis, not a medical diagnosis. A sports physio or doctor can tell you what specifically happened to the knee — the data can only tell you when and why the load was excessive.</p>
+    </div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#27ae60;color:#27ae60">🗓️ MARATHON BUILD TIMELINE — May 24, 2026<span class="sec-chevron" style="color:#27ae60">▼</span></div>
+  <div class="sec-body">
+
+<!-- Timeline cards -->
+<div style="overflow-x:auto;padding-bottom:8px;margin-bottom:16px">
+  <div style="display:flex;gap:8px;align-items:flex-start;min-width:max-content">
+
+    <!-- W1: Recovery (THIS WEEK) -->
+    <div style="border:2px solid #e74c3c;border-radius:10px;padding:12px 14px;width:118px;background:#0d0606;position:relative;flex-shrink:0">
+      <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#e74c3c;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap">▶ THIS WEEK</div>
+      <div style="font-size:9px;color:#e74c3c;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Recovery</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">Mar 23–29</div>
+      <div style="font-size:26px;font-weight:700;color:#eee;line-height:1">12</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">km long run</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#e74c3c;width:40%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#666;margin-top:5px">Easy · HR &lt;140</div>
+    </div>
+
+    <div style="color:#2a2a2a;font-size:18px;margin-top:32px;flex-shrink:0">›</div>
+
+    <!-- W2: Build -->
+    <div style="border:1px solid #27ae60;border-radius:10px;padding:12px 14px;width:118px;background:#060d08;flex-shrink:0">
+      <div style="font-size:9px;color:#27ae60;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Build</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">Mar 30–Apr 5</div>
+      <div style="font-size:26px;font-weight:700;color:#eee;line-height:1">18</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">km long run</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#27ae60;width:60%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#666;margin-top:5px">1 quality session max</div>
+    </div>
+
+    <div style="color:#2a2a2a;font-size:18px;margin-top:32px;flex-shrink:0">›</div>
+
+    <!-- W3: Build -->
+    <div style="border:1px solid #27ae60;border-radius:10px;padding:12px 14px;width:118px;background:#060d08;flex-shrink:0">
+      <div style="font-size:9px;color:#27ae60;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Build</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">Apr 6–12</div>
+      <div style="font-size:26px;font-weight:700;color:#eee;line-height:1">22</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">km long run</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#27ae60;width:73%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#666;margin-top:5px">ACWR target &lt;1.35</div>
+    </div>
+
+    <div style="color:#2a2a2a;font-size:18px;margin-top:32px;flex-shrink:0">›</div>
+
+    <!-- W4: Deload -->
+    <div style="border:1px solid #e67e22;border-radius:10px;padding:12px 14px;width:118px;background:#0d0a04;flex-shrink:0">
+      <div style="font-size:9px;color:#e67e22;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Deload</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">Apr 13–19</div>
+      <div style="font-size:26px;font-weight:700;color:#eee;line-height:1">18</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">km long run</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#e67e22;width:60%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#e67e22;margin-top:5px">Volume −30%</div>
+    </div>
+
+    <div style="color:#2a2a2a;font-size:18px;margin-top:32px;flex-shrink:0">›</div>
+
+    <!-- W5: Build -->
+    <div style="border:1px solid #27ae60;border-radius:10px;padding:12px 14px;width:118px;background:#060d08;flex-shrink:0">
+      <div style="font-size:9px;color:#27ae60;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Build</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">Apr 20–26</div>
+      <div style="font-size:26px;font-weight:700;color:#eee;line-height:1">26</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">km long run</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#27ae60;width:87%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#666;margin-top:5px">Long run = hard day</div>
+    </div>
+
+    <div style="color:#2a2a2a;font-size:18px;margin-top:32px;flex-shrink:0">›</div>
+
+    <!-- W6: PEAK -->
+    <div style="border:2px solid #9b59b6;border-radius:10px;padding:12px 14px;width:118px;background:#0d080f;flex-shrink:0">
+      <div style="font-size:9px;color:#9b59b6;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">PEAK</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">Apr 27–May 3</div>
+      <div style="font-size:26px;font-weight:700;color:#9b59b6;line-height:1">30</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">km long run</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#9b59b6;width:100%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#9b59b6;margin-top:5px">Highest mileage week</div>
+    </div>
+
+    <div style="color:#2a2a2a;font-size:18px;margin-top:32px;flex-shrink:0">›</div>
+
+    <!-- W7: Taper 1 -->
+    <div style="border:1px solid #3498db;border-radius:10px;padding:12px 14px;width:118px;background:#04080e;flex-shrink:0">
+      <div style="font-size:9px;color:#3498db;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Taper ↓30%</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">May 4–10</div>
+      <div style="font-size:26px;font-weight:700;color:#eee;line-height:1">22</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">km long run</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#3498db;width:73%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#666;margin-top:5px">No speed work</div>
+    </div>
+
+    <div style="color:#2a2a2a;font-size:18px;margin-top:32px;flex-shrink:0">›</div>
+
+    <!-- W8: Taper 2 -->
+    <div style="border:1px solid #3498db;border-radius:10px;padding:12px 14px;width:118px;background:#04080e;flex-shrink:0">
+      <div style="font-size:9px;color:#3498db;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Taper ↓50%</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">May 11–17</div>
+      <div style="font-size:26px;font-weight:700;color:#eee;line-height:1">14</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">km long run</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#3498db;width:47%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#666;margin-top:5px">No workouts at all</div>
+    </div>
+
+    <div style="color:#2a2a2a;font-size:18px;margin-top:32px;flex-shrink:0">›</div>
+
+    <!-- Race! -->
+    <div style="border:2px solid #f39c12;border-radius:10px;padding:12px 14px;width:118px;background:#0d0b03;flex-shrink:0">
+      <div style="font-size:9px;color:#f39c12;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Race Day</div>
+      <div style="font-size:10px;color:#555;margin-bottom:6px">May 24, 2026</div>
+      <div style="font-size:26px;line-height:1;margin-bottom:2px">🏁</div>
+      <div style="font-size:10px;color:#666;margin-bottom:8px">42.2 km</div>
+      <div style="background:#222;border-radius:2px;height:4px"><div style="background:#f39c12;width:100%;height:4px;border-radius:2px"></div></div>
+      <div style="font-size:10px;color:#f39c12;margin-top:5px">Ottawa Marathon</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 2026 Weekly Load Snapshot -->
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#3498db;color:#3498db">📊 2026 Weekly Load — ACWR Snapshot<span class="sec-chevron" style="color:#3498db">▼</span></div>
+  <div class="sec-body">
+<div class="card wide" style="margin-bottom:16px;overflow-x:auto">
+  <table style="width:100%;min-width:560px;border-collapse:collapse;font-size:12px">
+    <thead>
+      <tr style="color:#555;text-transform:uppercase;font-size:10px;letter-spacing:0.8px">
+        <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #1a1a1a">Week</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #1a1a1a">Distance</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #1a1a1a">Runs</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #1a1a1a">Hard sessions</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #1a1a1a">Total RE</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #1a1a1a">ACWR</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #1a1a1a">HRV avg</th>
+        <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #1a1a1a">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #111">
+        <td style="padding:6px 8px;color:#aaa">Jan 5</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">18.6 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">4</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">1</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">184</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:700;color:#e74c3c">2.46 🔴</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#e74c3c">53 ms</td><td style="padding:6px 8px;color:#e74c3c;font-size:11px">Danger — return from rest</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111;background:#0d0505">
+        <td style="padding:6px 8px;color:#aaa">Jan 12</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">34.5 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">5</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">1</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">290</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:700;color:#e74c3c">3.05 🔴</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#e67e22">57 ms</td><td style="padding:6px 8px;color:#e74c3c;font-size:11px">PEAK RISK — 2× danger threshold</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111">
+        <td style="padding:6px 8px;color:#aaa">Jan 19</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">17.6 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">2</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">0</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">151</td>
+        <td style="padding:6px 8px;text-align:right;color:#27ae60">0.96 🟢</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#e74c3c">49 ms</td><td style="padding:6px 8px;color:#555;font-size:11px">Recovery</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111">
+        <td style="padding:6px 8px;color:#aaa">Jan 26</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">8.7 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">1</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">0</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">34</td>
+        <td style="padding:6px 8px;text-align:right;color:#27ae60">0.42 🟢</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#e67e22">50 ms</td><td style="padding:6px 8px;color:#555;font-size:11px">Very light</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111">
+        <td style="padding:6px 8px;color:#aaa">Feb 2</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">21.5 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">3</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">1</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">266</td>
+        <td style="padding:6px 8px;text-align:right;color:#27ae60">1.08 🟢</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#e74c3c">46 ms</td><td style="padding:6px 8px;color:#555;font-size:11px">Controlled build</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111">
+        <td style="padding:6px 8px;color:#aaa">Feb 9</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">13.8 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">2</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">0</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">143</td>
+        <td style="padding:6px 8px;text-align:right;color:#27ae60">0.67 🟢</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#e67e22">51 ms</td><td style="padding:6px 8px;color:#555;font-size:11px">Easy week</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111;background:#0d0505">
+        <td style="padding:6px 8px;color:#aaa">Feb 16</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">41.4 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">5</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">4</td>
+        <td style="padding:6px 8px;text-align:right;color:#e67e22">418</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:700;color:#e74c3c">2.69 🔴</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#27ae60">55 ms</td><td style="padding:6px 8px;color:#e74c3c;font-size:11px">Danger — 4 hard sessions</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111">
+        <td style="padding:6px 8px;color:#aaa">Feb 23</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">43.2 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">6</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">3</td>
+        <td style="padding:6px 8px;text-align:right;color:#e67e22">477</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:700;color:#e74c3c">2.02 🔴</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#27ae60">59 ms</td><td style="padding:6px 8px;color:#e74c3c;font-size:11px">Still high — back-to-back hard</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111">
+        <td style="padding:6px 8px;color:#aaa">Mar 2</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">42.3 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">5</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">2</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">478</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:700;color:#e67e22">1.41 🟡</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#27ae60">59 ms</td><td style="padding:6px 8px;color:#e67e22;font-size:11px">Warning zone — watch density</td>
+      </tr>
+      <tr style="border-bottom:1px solid #111">
+        <td style="padding:6px 8px;color:#aaa">Mar 9</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">39.2 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">4</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">3</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">481</td>
+        <td style="padding:6px 8px;text-align:right;color:#27ae60">1.11 🟢</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#27ae60">59 ms</td><td style="padding:6px 8px;color:#555;font-size:11px">Green — but density risk</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 8px;color:#aaa">Mar 16</td>
+        <td style="padding:6px 8px;text-align:right;color:#eee">31.7 km</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">3</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">2</td>
+        <td style="padding:6px 8px;text-align:right;color:#aaa">353</td>
+        <td style="padding:6px 8px;text-align:right;color:#27ae60">0.76 🟢</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:#e74c3c">53 ms</td><td style="padding:6px 8px;color:#555;font-size:11px">Tapering naturally</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin:10px 0 0;font-size:11px;color:#444">ACWR: 🟢 &lt;1.3 optimal · 🟡 1.3–1.5 warning · 🔴 &gt;1.5 danger. Three weeks hit the danger zone in 2026 — all were navigated without injury due to low starting base. That margin does not exist during a marathon build.</p>
+</div>
+
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#27ae60;color:#27ae60">🗓️ 2026 TRAINING ANALYSIS — Marathon Build Monitor<span class="sec-chevron" style="color:#27ae60">▼</span></div>
+  <div class="sec-body">
+<div style="background:linear-gradient(135deg,#07120a,#0b1a0e);border:1px solid #27ae60;border-radius:12px;padding:16px 22px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+  <div style="font-size:32px">🏃</div>
+  <div style="flex:1;min-width:200px">
+    <div style="font-size:16px;font-weight:700;color:#27ae60;margin-bottom:2px">First Marathon — May 24, 2026</div>
+    <div style="font-size:13px;color:#888">Ottawa Marathon · <strong style="color:#eee">9 weeks out</strong> · Every training decision from here counts double</div>
+  </div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+    <div style="text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#27ae60">63</div>
+      <div style="font-size:11px;color:#555;text-transform:uppercase">days to race</div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#3498db">6</div>
+      <div style="font-size:11px;color:#555;text-transform:uppercase">build weeks</div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#e67e22">2–3</div>
+      <div style="font-size:11px;color:#555;text-transform:uppercase">taper weeks</div>
+    </div>
+  </div>
+</div>
+
+<!-- Garmin Intelligence Panel -->
+<div style="background:#07080f;border:1px solid #9b59b6;border-radius:12px;padding:18px 22px;margin-bottom:16px">
+  <div style="font-size:12px;font-weight:700;color:#9b59b6;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">🤖 GARMIN INTELLIGENCE — Data your watch knows that Strava doesn't</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+
+    <div style="flex:1;min-width:180px;background:#0d0b14;border:1px solid #9b59b6;border-radius:10px;padding:14px 18px;text-align:center">
+      <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Garmin Marathon Prediction</div>
+      <div style="font-size:28px;font-weight:700;color:#9b59b6;margin:4px 0">3:44</div>
+      <div style="font-size:11px;color:#888">Event midpoint target · range 3:39–3:49</div>
+      <div style="font-size:10px;color:#555;margin-top:4px">Current fitness alone: 3:51 · gap = long run build</div>
+    </div>
+
+    <div style="flex:1;min-width:180px;background:#0d0b14;border:1px solid #3498db;border-radius:10px;padding:14px 18px;text-align:center">
+      <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">VO₂max</div>
+      <div style="font-size:28px;font-weight:700;color:#3498db;margin:4px 0">50</div>
+      <div style="font-size:11px;color:#888">mL/kg/min · Superior range</div>
+      <div style="font-size:10px;color:#555;margin-top:4px">Peak: 58 (Apr 2025) · −8 from peak · recovering</div>
+    </div>
+
+    <div style="flex:1;min-width:180px;background:#0d0b14;border:1px solid #e67e22;border-radius:10px;padding:14px 18px;text-align:center">
+      <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">HRV Weekly Average</div>
+      <div style="font-size:28px;font-weight:700;color:#e67e22;margin:4px 0">54 ms</div>
+      <div style="font-size:11px;color:#e67e22">↓ from 62 ms (Mar 7) — −13%</div>
+      <div style="font-size:10px;color:#555;margin-top:4px">Two weeks of hard density = measurable fatigue signal</div>
+    </div>
+
+    <div style="flex:1;min-width:180px;background:#0d0b14;border:1px solid #27ae60;border-radius:10px;padding:14px 18px;text-align:center">
+      <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Training Readiness</div>
+      <div style="font-size:28px;font-weight:700;color:#27ae60;margin:4px 0">76</div>
+      <div style="font-size:11px;color:#27ae60">HIGH · Mar 21</div>
+      <div style="font-size:10px;color:#555;margin-top:4px">Was 34 (LOW) on Mar 16 — day after the tempo</div>
+    </div>
+
+  </div>
+  <p style="margin:12px 0 0;font-size:11px;color:#555;line-height:1.6">Garmin feedback on your Ottawa Marathon event registration: <strong style="color:#9b59b6">"Improved Long-Term Load"</strong> — the training base is registering. The 7-minute gap between current fitness (3:51) and event midpoint target (3:44) is bridged by one thing: <em>longer long runs</em>. Garmin confirmed this explicitly as recently as January ("IMPROVE_LONG_RUNS"). The marathon build plan above addresses this directly.</p>
+</div>
+
+<!-- 2026 status strip -->
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+  <div style="flex:1;min-width:160px;background:#0e1a0e;border:1px solid #27ae60;border-radius:10px;padding:14px 18px;text-align:center">
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px">Runs in 2026</div>
+    <div style="font-size:28px;font-weight:700;color:#27ae60;margin:4px 0">41</div>
+    <div style="font-size:12px;color:#666">as of Mar 21</div>
+  </div>
+  <div style="flex:1;min-width:160px;background:#0e1a0e;border:1px solid #27ae60;border-radius:10px;padding:14px 18px;text-align:center">
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px">Total Distance</div>
+    <div style="font-size:28px;font-weight:700;color:#27ae60;margin:4px 0">323.9 km</div>
+    <div style="font-size:12px;color:#666">~18 km avg/week</div>
+  </div>
+  <div style="flex:1;min-width:160px;background:#0e1a0e;border:1px solid #e67e22;border-radius:10px;padding:14px 18px;text-align:center">
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px">Peak ACWR</div>
+    <div style="font-size:28px;font-weight:700;color:#e67e22;margin:4px 0">3.05</div>
+    <div style="font-size:12px;color:#666">Jan 12 — danger zone</div>
+  </div>
+  <div style="flex:1;min-width:160px;background:#0e1a0e;border:1px solid #e74c3c;border-radius:10px;padding:14px 18px;text-align:center">
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px">Current Load</div>
+    <div style="font-size:28px;font-weight:700;color:#e74c3c;margin:4px 0">42 km/wk</div>
+    <div style="font-size:12px;color:#666">4-week avg, rising</div>
+  </div>
+  <div style="flex:1;min-width:160px;background:#0e1a0e;border:1px solid #3498db;border-radius:10px;padding:14px 18px;text-align:center">
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px">Longest Run</div>
+    <div style="font-size:28px;font-weight:700;color:#3498db;margin:4px 0">15.5 km</div>
+    <div style="font-size:12px;color:#666">Mar 21 — need 30km peak</div>
+  </div>
+  <div style="flex:1;min-width:160px;background:#0e1a0e;border:1px solid #9b59b6;border-radius:10px;padding:14px 18px;text-align:center">
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px">Peak Long Run Target</div>
+    <div style="font-size:28px;font-weight:700;color:#9b59b6;margin:4px 0">30 km</div>
+    <div style="font-size:12px;color:#666">Apr 27 — 6 wks to build</div>
+  </div>
+</div>
+
+<!-- Recommendations -->
+<div style="background:#07080f;border:1px solid #3498db;border-radius:12px;padding:20px 24px;margin-bottom:16px">
+  <div style="font-size:14px;font-weight:700;color:#3498db;margin-bottom:14px;letter-spacing:0.5px">📋 MARATHON BUILD PLAN — Recommendations & Injury Prevention</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#e74c3c;font-weight:600;font-size:13px;margin-bottom:6px">🚨 Immediate (Next 7 Days)</div>
+      <ul style="color:#aaa;font-size:13px;margin:0;padding-left:16px;line-height:1.8">
+        <li>Mar 21's 15.5 km (RE=168) requires <strong style="color:#eee">2 full rest days</strong> before any running — this is the start of your marathon build, not a throwaway week</li>
+        <li>Next 3 runs: easy only, HR &lt;140, pace &gt;6:00/km, max 8 km — treat this as Week 0 recovery before building</li>
+        <li>No tempo or race-pace efforts until at least Mar 28 — the marathon is 9 weeks away, there is nothing to prove right now</li>
+      </ul>
+    </div>
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#27ae60;font-weight:600;font-size:13px;margin-bottom:6px">🏃 Long Run Progression to Race Day</div>
+      <table style="width:100%;font-size:12px;color:#aaa;border-collapse:collapse;margin-top:4px">
+        <tr style="color:#555;font-size:11px;text-transform:uppercase"><td style="padding:2px 4px">Week</td><td style="padding:2px 4px">Dates</td><td style="padding:2px 4px;text-align:right">Long Run</td><td style="padding:2px 4px;text-align:right">Type</td></tr>
+        <tr><td style="padding:3px 4px;color:#e74c3c">W1</td><td style="padding:3px 4px">Mar 23–29</td><td style="padding:3px 4px;text-align:right;color:#eee">12 km</td><td style="padding:3px 4px;text-align:right;color:#e74c3c">RECOVERY</td></tr>
+        <tr><td style="padding:3px 4px;color:#27ae60">W2</td><td style="padding:3px 4px">Mar 30–Apr 5</td><td style="padding:3px 4px;text-align:right;color:#eee">18 km</td><td style="padding:3px 4px;text-align:right;color:#27ae60">Build</td></tr>
+        <tr><td style="padding:3px 4px;color:#27ae60">W3</td><td style="padding:3px 4px">Apr 6–12</td><td style="padding:3px 4px;text-align:right;color:#eee">22 km</td><td style="padding:3px 4px;text-align:right;color:#27ae60">Build</td></tr>
+        <tr><td style="padding:3px 4px;color:#e67e22">W4</td><td style="padding:3px 4px">Apr 13–19</td><td style="padding:3px 4px;text-align:right;color:#eee">18 km</td><td style="padding:3px 4px;text-align:right;color:#e67e22">Deload</td></tr>
+        <tr><td style="padding:3px 4px;color:#27ae60">W5</td><td style="padding:3px 4px">Apr 20–26</td><td style="padding:3px 4px;text-align:right;color:#eee">26 km</td><td style="padding:3px 4px;text-align:right;color:#27ae60">Build</td></tr>
+        <tr><td style="padding:3px 4px;color:#9b59b6">W6</td><td style="padding:3px 4px">Apr 27–May 3</td><td style="padding:3px 4px;text-align:right;color:#eee">30 km</td><td style="padding:3px 4px;text-align:right;color:#9b59b6">PEAK</td></tr>
+        <tr><td style="padding:3px 4px;color:#3498db">W7</td><td style="padding:3px 4px">May 4–10</td><td style="padding:3px 4px;text-align:right;color:#eee">22 km</td><td style="padding:3px 4px;text-align:right;color:#3498db">Taper ↓30%</td></tr>
+        <tr><td style="padding:3px 4px;color:#3498db">W8</td><td style="padding:3px 4px">May 11–17</td><td style="padding:3px 4px;text-align:right;color:#eee">14 km</td><td style="padding:3px 4px;text-align:right;color:#3498db">Taper ↓50%</td></tr>
+        <tr style="border-top:1px solid #27ae60"><td style="padding:3px 4px;color:#27ae60;font-weight:700">RACE</td><td style="padding:3px 4px;color:#27ae60">May 24</td><td style="padding:3px 4px;text-align:right;color:#27ae60;font-weight:700">42.2 km</td><td style="padding:3px 4px;text-align:right;color:#27ae60">🏁</td></tr>
+      </table>
+      <p style="color:#666;font-size:11px;margin:6px 0 0">All long runs: easy pace 5:45–6:30/km, HR &lt;145</p>
+    </div>
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#e67e22;font-weight:600;font-size:13px;margin-bottom:6px">⚠️ Marathon Build Density Rule</div>
+      <ul style="color:#aaa;font-size:13px;margin:0;padding-left:16px;line-height:1.8">
+        <li>Max <strong style="color:#eee">1 quality session per week</strong> (RE &gt;130) during the build — long runs are your hard session; don't stack them with tempo work</li>
+        <li><strong style="color:#eee">Never schedule two RE &gt;150 efforts within 48 hours</strong> — your Aug 2025 block violated this three times; a marathon build amplifies this risk</li>
+        <li>Every 4th week: mandatory deload (Week 4 = Apr 13–19) — cut weekly volume 30–40%</li>
+        <li><strong style="color:#e74c3c">No speed work after May 10</strong> — anything that breaks you down in the final 2 weeks cannot be repaired before race day</li>
+      </ul>
+    </div>
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#f39c12;font-weight:600;font-size:13px;margin-bottom:6px">🏁 Marathon Taper (May 4–23)</div>
+      <ul style="color:#aaa;font-size:13px;margin:0;padding-left:16px;line-height:1.8">
+        <li><strong style="color:#eee">Week 7 (May 4–10):</strong> Cut weekly volume 30%, long run 22 km at easy pace only</li>
+        <li><strong style="color:#eee">Week 8 (May 11–17):</strong> Cut weekly volume 50%, long run 14 km, no workouts</li>
+        <li><strong style="color:#eee">Race week:</strong> Mon–Wed easy 20–30 min shakeout runs only, Thu–Fri complete rest, Sat–Sun race</li>
+        <li>Taper madness is real — legs feeling heavy and sluggish in Week 8 is <em>normal</em>, not a sign you've lost fitness. Do not panic-train</li>
+        <li>Do not run a hard session within <strong style="color:#eee">14 days of May 24</strong> — repeat of the Army Run pattern would be catastrophic at marathon distance</li>
+      </ul>
+    </div>
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#9b59b6;font-weight:600;font-size:13px;margin-bottom:6px">💓 HRV Rule — Your Second ACWR</div>
+      <ul style="color:#aaa;font-size:13px;margin:0;padding-left:16px;line-height:1.8">
+        <li>Check your HRV weekly average each Monday morning. If it has dropped <strong style="color:#eee">&gt;8% from the prior week</strong>, treat it as a yellow ACWR day — easy running only, no sessions over RE 100</li>
+        <li>If it has dropped <strong style="color:#e74c3c">&gt;15%</strong>, treat it as a red ACWR day — rest or walk only, regardless of how your legs feel</li>
+        <li>Your March data: HRV was 62 ms on Mar 7 and 53 ms on Mar 16 — a 14% drop. Your watch was telling you what the density data already showed. Listen to both</li>
+        <li>HRV typically recovers within 2–3 easy days. A 54 ms reading today after 2 easy days post-long-run is a good sign</li>
+      </ul>
+    </div>
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#27ae60;font-weight:600;font-size:13px;margin-bottom:6px">📈 ACWR Traffic Light</div>
+      <ul style="color:#aaa;font-size:13px;margin:0;padding-left:16px;line-height:1.8">
+        <li><span style="color:#27ae60">🟢 0.8–1.3</span> — optimal training zone, push as planned</li>
+        <li><span style="color:#f39c12">🟡 1.3–1.5</span> — warning: reduce intensity, keep volume easy</li>
+        <li><span style="color:#e74c3c">🔴 &gt;1.5</span> — danger: immediate deload, no hard sessions until &lt;1.3</li>
+        <li>Marathon build will naturally push ACWR up as long runs grow — target <strong style="color:#eee">max 1.35</strong> during build; the margin for error shrinks as race day approaches</li>
+      </ul>
+    </div>
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#e67e22;font-weight:600;font-size:13px;margin-bottom:6px">😓 Honour the Label — The "Tired Run" Rule</div>
+      <ul style="color:#aaa;font-size:13px;margin:0;padding-left:16px;line-height:1.8">
+        <li>Your Aug 25 run was logged as "Tired Run" yet executed at <strong style="color:#eee">4:52/km</strong> — a tempo effort. Your body flagged fatigue; your legs ignored it</li>
+        <li>In a marathon build, fatigue accumulates over weeks — a tired day in week 5 of a build is not the same as a tired day in a base week. Act on it earlier</li>
+        <li>When you feel tired enough to note it: target <strong style="color:#eee">6:30–7:00/km</strong>, HR below 130, distance under 8km. Use HR as the governor, not perceived effort</li>
+      </ul>
+    </div>
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#9b59b6;font-weight:600;font-size:13px;margin-bottom:6px">🦵 Knee-Specific — Marathon Stakes</div>
+      <ul style="color:#aaa;font-size:13px;margin:0;padding-left:16px;line-height:1.8">
+        <li>Any knee discomfort = immediate 2-day rest, no exceptions — a DNS is always better than a DNF at 30 km</li>
+        <li>Reduce pace to &gt;6:30/km at first sign of pain — do not push through like Oct 28, 2025. You will not run through it on marathon day</li>
+        <li>Strength training: <strong style="color:#eee">single-leg squats and hip abductor work 2× per week</strong> is non-negotiable during a marathon build — pavement pounding multiplies knee stress vs trail running</li>
+        <li>Surfaces matter: prioritise softer surfaces (trail, grass, gravel path) for easy runs; save pavement for quality sessions only</li>
+      </ul>
+    </div>
+
+    <div style="background:#0a0c18;border-radius:8px;padding:14px 16px">
+      <div style="color:#3498db;font-weight:600;font-size:13px;margin-bottom:6px">📊 What's Working — Build Confidence</div>
+      <ul style="color:#aaa;font-size:13px;margin:0;padding-left:16px;line-height:1.8">
+        <li>Aerobic efficiency up 10% since January — you are already meaningfully fitter than when 2026 started</li>
+        <li>42 km/week average is a <strong style="color:#eee">solid marathon base</strong> — most first-marathon plans target 50–60 km/week peak; you have room to build without overreaching</li>
+        <li>Average HR staying controlled (139–145) despite increasing distances — your aerobic system is adapting</li>
+        <li>Garmin Endurance Score: <strong style="color:#eee">ADVANCED</strong> classification (6,376 as of Mar 21) — above average for your age/fitness category</li>
+        <li>2026 vs same period 2025: 323 km vs 10 km — you arrive at this marathon with the most fitness you've had since your April 2025 peak</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- Risk flags -->
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+  <!-- Red flag -->
+  <div style="flex:1;min-width:280px;background:#130a0a;border:1px solid #e74c3c;border-radius:10px;padding:16px 20px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="background:#e74c3c;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">🔴 HIGH RISK</span>
+      <span style="color:#e74c3c;font-weight:600">January ACWR Spikes</span>
+    </div>
+    <p style="color:#aaa;font-size:13px;margin:0;line-height:1.6">
+      Week of Jan 5 → Jan 12: volume jumped from <strong style="color:#eee">7.5 km/wk CTL to 34.5 km actual</strong> — ACWR hit <strong style="color:#e74c3c">3.05</strong>, more than double the danger threshold of 1.5. This is the single most dangerous number in your 2026 data. You likely avoided injury only because you were returning from a very low base, not a true injury-level stimulus. The following week of Feb 16 repeated the pattern: ACWR <strong style="color:#e74c3c">2.69</strong>.
+    </p>
+  </div>
+  <!-- Orange flag -->
+  <div style="flex:1;min-width:280px;background:#130e05;border:1px solid #e67e22;border-radius:10px;padding:16px 20px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="background:#e67e22;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">🟠 WATCH NOW</span>
+      <span style="color:#e67e22;font-weight:600">March Hard Run Density — HRV Confirms Fatigue</span>
+    </div>
+    <p style="color:#aaa;font-size:13px;margin:0;line-height:1.6">
+      In the 21 days of March, you logged <strong style="color:#eee">7 hard runs (RE &gt; 100)</strong> — roughly one in three runs. The Mar 15 tempo (RE=176) followed by the Mar 21 long run (RE=168, 15.5 km) mirrors the exact pattern that caused your 2025 knee injury. Your Garmin watch independently confirmed the fatigue: <strong style="color:#e67e22">HRV dropped from 62 ms (Mar 7) to 53 ms (Mar 16) — a 15% decline in 9 days</strong>. Training readiness hit <strong style="color:#e74c3c">LOW (34)</strong> on Mar 16, the day after the tempo. Your body is saying what the data shows. With a marathon 9 weeks out, <strong style="color:#e67e22">the long run IS your quality session</strong> — tempo work in the same week multiplies fatigue without adding marathon fitness.
+    </p>
+  </div>
+  <!-- Green flag -->
+  <div style="flex:1;min-width:280px;background:#060f0a;border:1px solid #27ae60;border-radius:10px;padding:16px 20px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="background:#27ae60;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">🟢 POSITIVE</span>
+      <span style="color:#27ae60;font-weight:600">Fitness Building Well</span>
+    </div>
+    <p style="color:#aaa;font-size:13px;margin:0;line-height:1.6">
+      Aerobic efficiency is improving each month: your effort-per-km score dropped from <strong style="color:#eee">43.7 → 39.5</strong> Jan–Mar, meaning you're running faster at the same heart rate. Long run distance is progressing sensibly week-to-week (9 → 10.5 → 11.7 → 12.1 → 12.9 → 15.5 km). No races yet, so your max single-run RE of 176 is well below the Army Run's 395. Base fitness is clearly at a higher level than this time last year.
+    </p>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#3498db;color:#3498db">📅 MONTHLY VOLUME HISTORY — 2021–2026<span class="sec-chevron" style="color:#3498db">▼</span></div>
+  <div class="sec-body">
+<div style="background:#07080f;border:1px solid #1a2a3a;border-radius:10px;padding:16px 20px;margin-bottom:12px">
+  <div style="font-size:12px;color:#888;margin-bottom:12px">Kilometres per month · bar height proportional to volume · max = 188 km (Jul 2024)</div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:500px"><tbody><tr><td style="font-size:11px;font-weight:700;color:#3498db;padding:4px 8px 0 0;white-space:nowrap;vertical-align:bottom">2021<br><span style="font-weight:400;font-size:10px;color:#555">31 km</span></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jan: 7 km (2 runs)" style="background:#3498db;width:100%;height:3px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">F</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="May: 7 km (2 runs)" style="background:#3498db;width:100%;height:3px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jun: 17 km (4 runs)" style="background:#3498db;width:100%;height:4px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">S</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">O</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">N</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">D</div></td></tr><tr><td style="font-size:11px;font-weight:700;color:#27ae60;padding:4px 8px 0 0;white-space:nowrap;vertical-align:bottom">2022<br><span style="font-weight:400;font-size:10px;color:#555">0 km</span></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">F</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">S</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">O</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">N</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">D</div></td></tr><tr><td style="font-size:11px;font-weight:700;color:#e67e22;padding:4px 8px 0 0;white-space:nowrap;vertical-align:bottom">2023<br><span style="font-weight:400;font-size:10px;color:#555">158 km</span></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">F</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jun: 10 km (2 runs)" style="background:#e67e22;width:100%;height:3px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jul: 79 km (12 runs)" style="background:#e67e22;width:100%;height:20px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Aug: 47 km (5 runs)" style="background:#e67e22;width:100%;height:12px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Sep: 23 km (1 runs)" style="background:#e67e22;width:100%;height:6px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">S</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">O</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">N</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">D</div></td></tr><tr><td style="font-size:11px;font-weight:700;color:#9b59b6;padding:4px 8px 0 0;white-space:nowrap;vertical-align:bottom">2024<br><span style="font-weight:400;font-size:10px;color:#555">710 km</span></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">F</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Mar: 10 km (2 runs)" style="background:#9b59b6;width:100%;height:3px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Apr: 66 km (9 runs)" style="background:#9b59b6;width:100%;height:17px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="May: 57 km (8 runs)" style="background:#9b59b6;width:100%;height:15px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jun: 134 km (17 runs)" style="background:#9b59b6;width:100%;height:35px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jul: 188 km (18 runs)" style="background:#9b59b6;width:100%;height:49px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Aug: 131 km (13 runs)" style="background:#9b59b6;width:100%;height:34px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Sep: 98 km (8 runs)" style="background:#9b59b6;width:100%;height:26px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">S</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Oct: 20 km (4 runs)" style="background:#9b59b6;width:100%;height:5px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">O</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Nov: 5 km (1 runs)" style="background:#9b59b6;width:100%;height:3px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">N</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">D</div></td></tr><tr><td style="font-size:11px;font-weight:700;color:#e74c3c;padding:4px 8px 0 0;white-space:nowrap;vertical-align:bottom">2025<br><span style="font-weight:400;font-size:10px;color:#555">1094 km</span></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">F</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Mar: 10 km (2 runs)" style="background:#e74c3c;width:100%;height:3px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Apr: 40 km (7 runs)" style="background:#e74c3c;width:100%;height:10px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="May: 109 km (18 runs)" style="background:#e74c3c;width:100%;height:28px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jun: 123 km (16 runs)" style="background:#e74c3c;width:100%;height:32px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jul: 177 km (18 runs)" style="background:#e74c3c;width:100%;height:46px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Aug: 183 km (15 runs)" style="background:#e74c3c;width:100%;height:48px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Sep: 146 km (16 runs)" style="background:#e74c3c;width:100%;height:38px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">S</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Oct: 125 km (14 runs)" style="background:#e74c3c;width:100%;height:33px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">O</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Nov: 124 km (16 runs)" style="background:#e74c3c;width:100%;height:32px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">N</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Dec: 57 km (9 runs)" style="background:#e74c3c;width:100%;height:15px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">D</div></td></tr><tr><td style="font-size:11px;font-weight:700;color:#f1c40f;padding:4px 8px 0 0;white-space:nowrap;vertical-align:bottom">2026<br><span style="font-weight:400;font-size:10px;color:#555">324 km</span></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Jan: 91 km (13 runs)" style="background:#f1c40f;width:100%;height:24px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Feb: 108 km (14 runs)" style="background:#f1c40f;width:100%;height:28px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">F</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div title="Mar: 126 km (14 runs)" style="background:#f1c40f;width:100%;height:33px;border-radius:2px 2px 0 0"></div><div style="font-size:8px;color:#444;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">M</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">J</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">A</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">S</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">O</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">N</div></td><td style="width:7.5%;padding:2px 3px;vertical-align:bottom"><div style="width:100%;height:2px;background:#1a1a2e;border-radius:1px"></div><div style="font-size:8px;color:#333;text-align:center;margin-top:1px">D</div></td></tr></tbody></table></div>
+  <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:12px;font-size:11px">
+    <span style="color:#888">Key gaps:</span>
+    <span style="color:#e74c3c">■</span><span style="color:#888">Oct–Nov 2025 knee injury</span>
+    <span style="color:#9b59b6">■</span><span style="color:#888">2024 peak at 188 km/mo</span>
+  </div>
+</div>
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#27ae60;color:#27ae60">❤️ AEROBIC EFFICIENCY TREND — Pace per Heartbeat<span class="sec-chevron" style="color:#27ae60">▼</span></div>
+  <div class="sec-body">
+<div style="background:#07080f;border:1px solid #1a2a1a;border-radius:10px;padding:16px 20px;margin-bottom:12px">
+  <div style="font-size:12px;color:#888;margin-bottom:4px">Normalised pace at 160 bpm — lower = running faster at the same heart rate = more aerobically fit</div>
+  <div style="font-size:11px;color:#555;margin-bottom:14px">Runs ≥5 km with HR data · quarterly average</div>
+  <table style="width:100%;border-collapse:collapse">
+    <thead><tr style="border-bottom:1px solid #222">
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Quarter</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Normalised Pace</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Relative Fitness</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Trend</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Runs</th>
+    </tr></thead>
+    <tbody><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;color:#ccc;font-size:12px">2024-Q2</td><td style="padding:7px 10px;font-size:12px;color:#eee;font-weight:400">6:57/km @ 160 bpm</td><td style="padding:7px 10px"><div style="background:#1a1a2e;border-radius:3px;height:8px;width:100%;max-width:200px"><div style="background:#3498db;height:100%;width:0%;border-radius:3px"></div></div></td><td style="padding:7px 10px;font-size:11px;color:#888"></td><td style="padding:7px 10px;font-size:11px;color:#555">n=20</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;color:#ccc;font-size:12px">2024-Q3</td><td style="padding:7px 10px;font-size:12px;color:#eee;font-weight:400">6:52/km @ 160 bpm</td><td style="padding:7px 10px"><div style="background:#1a1a2e;border-radius:3px;height:8px;width:100%;max-width:200px"><div style="background:#3498db;height:100%;width:5%;border-radius:3px"></div></div></td><td style="padding:7px 10px;font-size:11px;color:#888"> → flat</td><td style="padding:7px 10px;font-size:11px;color:#555">n=39</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;color:#ccc;font-size:12px">2024-Q4</td><td style="padding:7px 10px;font-size:12px;color:#eee;font-weight:400">6:06/km @ 160 bpm</td><td style="padding:7px 10px"><div style="background:#1a1a2e;border-radius:3px;height:8px;width:100%;max-width:200px"><div style="background:#3498db;height:100%;width:56%;border-radius:3px"></div></div></td><td style="padding:7px 10px;font-size:11px;color:#27ae60"> ↑ better</td><td style="padding:7px 10px;font-size:11px;color:#555">n=5</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;color:#ccc;font-size:12px">2025-Q1</td><td style="padding:7px 10px;font-size:12px;color:#eee;font-weight:400">6:01/km @ 160 bpm</td><td style="padding:7px 10px"><div style="background:#1a1a2e;border-radius:3px;height:8px;width:100%;max-width:200px"><div style="background:#3498db;height:100%;width:61%;border-radius:3px"></div></div></td><td style="padding:7px 10px;font-size:11px;color:#888"> → flat</td><td style="padding:7px 10px;font-size:11px;color:#555">n=2</td></tr><tr style="background:#071207;border-bottom:1px solid #111"><td style="padding:7px 10px;color:#ccc;font-size:12px">⭐ 2025-Q2</td><td style="padding:7px 10px;font-size:12px;color:#eee;font-weight:700">5:27/km @ 160 bpm</td><td style="padding:7px 10px"><div style="background:#1a1a2e;border-radius:3px;height:8px;width:100%;max-width:200px"><div style="background:#27ae60;height:100%;width:100%;border-radius:3px"></div></div></td><td style="padding:7px 10px;font-size:11px;color:#27ae60"> ↑ better</td><td style="padding:7px 10px;font-size:11px;color:#555">n=34</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;color:#ccc;font-size:12px">2025-Q3</td><td style="padding:7px 10px;font-size:12px;color:#eee;font-weight:400">5:39/km @ 160 bpm</td><td style="padding:7px 10px"><div style="background:#1a1a2e;border-radius:3px;height:8px;width:100%;max-width:200px"><div style="background:#3498db;height:100%;width:86%;border-radius:3px"></div></div></td><td style="padding:7px 10px;font-size:11px;color:#e74c3c"> ↓ worse</td><td style="padding:7px 10px;font-size:11px;color:#555">n=49</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;color:#ccc;font-size:12px">2025-Q4</td><td style="padding:7px 10px;font-size:12px;color:#eee;font-weight:400">6:39/km @ 160 bpm</td><td style="padding:7px 10px"><div style="background:#1a1a2e;border-radius:3px;height:8px;width:100%;max-width:200px"><div style="background:#3498db;height:100%;width:19%;border-radius:3px"></div></div></td><td style="padding:7px 10px;font-size:11px;color:#e74c3c"> ↓ worse</td><td style="padding:7px 10px;font-size:11px;color:#555">n=36</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;color:#ccc;font-size:12px">2026-Q1</td><td style="padding:7px 10px;font-size:12px;color:#eee;font-weight:400">6:31/km @ 160 bpm</td><td style="padding:7px 10px"><div style="background:#1a1a2e;border-radius:3px;height:8px;width:100%;max-width:200px"><div style="background:#3498db;height:100%;width:29%;border-radius:3px"></div></div></td><td style="padding:7px 10px;font-size:11px;color:#27ae60"> ↑ better</td><td style="padding:7px 10px;font-size:11px;color:#555">n=37</td></tr></tbody>
+  </table>
+  <div style="margin-top:12px;background:#071207;border-left:3px solid #27ae60;padding:8px 12px;font-size:12px;color:#888">
+    <strong style="color:#27ae60">Peak fitness: 2025-Q2</strong> — running 5:27/km at 160 bpm. Current (2026-Q1): 6:31/km — recovering from injury but improving since 2025-Q4. <strong style="color:#eee">Target:</strong> return to sub-6:00 normalised pace by race week.
+  </div>
+</div>
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#e67e22;color:#e67e22">🏃 LONG RUN PROGRESSION — All Runs ≥15 km<span class="sec-chevron" style="color:#e67e22">▼</span></div>
+  <div class="sec-body">
+<div style="background:#07080f;border:1px solid #2a1a0a;border-radius:10px;padding:16px 20px;margin-bottom:12px">
+  <div style="font-size:12px;color:#888;margin-bottom:14px">25 runs ≥15 km · pace: <span style="color:#27ae60">■ &lt;4:40</span> <span style="color:#f1c40f">■ 4:40–5:30</span> <span style="color:#e67e22">■ 5:30–6:20</span> <span style="color:#e74c3c">■ &gt;6:20</span></div>
+  <table style="width:100%;border-collapse:collapse">
+    <thead><tr style="border-bottom:1px solid #222">
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Date</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Distance</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Avg Pace</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Avg HR</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Note</th>
+    </tr></thead>
+    <tbody><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Sep 17, 2023</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">22.8 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e74c3c">6:30/km</td><td style="padding:7px 10px;font-size:12px;color:#888">— bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jun 22, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.6 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:58/km</td><td style="padding:7px 10px;font-size:12px;color:#888">149 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jun 29, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">18.4 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e74c3c">6:30/km</td><td style="padding:7px 10px;font-size:12px;color:#888">142 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jul 06, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.4 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e74c3c">6:27/km</td><td style="padding:7px 10px;font-size:12px;color:#888">139 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jul 13, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">19.8 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e74c3c">6:42/km</td><td style="padding:7px 10px;font-size:12px;color:#888">155 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jul 20, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.4 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e74c3c">6:22/km</td><td style="padding:7px 10px;font-size:12px;color:#888">135 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jul 27, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">21.2 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e74c3c">6:26/km</td><td style="padding:7px 10px;font-size:12px;color:#888">146 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Aug 04, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.6 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e74c3c">6:32/km</td><td style="padding:7px 10px;font-size:12px;color:#888">142 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Aug 10, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">23.0 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e74c3c">6:42/km</td><td style="padding:7px 10px;font-size:12px;color:#888">142 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Sep 01, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">22.9 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">6:11/km</td><td style="padding:7px 10px;font-size:12px;color:#888">153 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Sep 22, 2024</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">21.5 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#f1c40f">5:24/km</td><td style="padding:7px 10px;font-size:12px;color:#888">157 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jun 29, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.8 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#f1c40f">4:55/km</td><td style="padding:7px 10px;font-size:12px;color:#888">160 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jul 13, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.7 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">6:00/km</td><td style="padding:7px 10px;font-size:12px;color:#888">147 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jul 20, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">18.4 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:36/km</td><td style="padding:7px 10px;font-size:12px;color:#888">150 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Jul 27, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.7 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:58/km</td><td style="padding:7px 10px;font-size:12px;color:#888">153 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Aug 04, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">20.0 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:44/km</td><td style="padding:7px 10px;font-size:12px;color:#888">139 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Aug 09, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.6 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:44/km</td><td style="padding:7px 10px;font-size:12px;color:#888">142 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Aug 24, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">23.2 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:43/km</td><td style="padding:7px 10px;font-size:12px;color:#888">141 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Aug 27, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.0 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#f1c40f">5:02/km</td><td style="padding:7px 10px;font-size:12px;color:#888">152 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="background:#071207;border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Sep 21, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">🏅 21.3 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#27ae60">4:33/km</td><td style="padding:7px 10px;font-size:12px;color:#888">167 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555">Army Run 21.1km</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Sep 28, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">15.7 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:57/km</td><td style="padding:7px 10px;font-size:12px;color:#888">143 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Oct 04, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.7 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:53/km</td><td style="padding:7px 10px;font-size:12px;color:#888">135 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Oct 12, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">16.0 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:50/km</td><td style="padding:7px 10px;font-size:12px;color:#888">149 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Nov 23, 2025</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">15.2 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:49/km</td><td style="padding:7px 10px;font-size:12px;color:#888">139 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr><tr style="border-bottom:1px solid #111"><td style="padding:7px 10px;font-size:12px;color:#888">Mar 21, 2026</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#eee">15.5 km</td><td style="padding:7px 10px;font-size:13px;font-weight:700;color:#e67e22">5:51/km</td><td style="padding:7px 10px;font-size:12px;color:#888">142 bpm</td><td style="padding:7px 10px;font-size:11px;color:#555"></td></tr></tbody>
+  </table>
+  <div style="margin-top:12px;background:#070a12;border-left:3px solid #e67e22;padding:8px 12px;font-size:12px;color:#888">
+    <strong style="color:#e67e22">Marathon context:</strong> Longest run ever is 23.2 km (Aug 24, 2025). A marathon is 42.2 km — long runs need to reach 30–32 km by week 6 of this build. Mar 21 (15.5 km) is the first long run of the 2026 build.
+  </div>
+</div>
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#9b59b6;color:#9b59b6">🎯 GARMIN MARATHON PREDICTION TREND — Jan–Mar 2026<span class="sec-chevron" style="color:#9b59b6">▼</span></div>
+  <div class="sec-body">
+<div style="background:#07080f;border:1px solid #1a0a2a;border-radius:10px;padding:16px 20px;margin-bottom:12px">
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+    <div style="background:#100a18;border:1px solid #9b59b6;border-radius:8px;padding:10px 16px;flex:1;min-width:120px">
+      <div style="font-size:10px;color:#9b59b6;margin-bottom:3px">BEST PREDICTION</div>
+      <div style="font-size:20px;font-weight:700;color:#eee">3:42:24</div>
+      <div style="font-size:10px;color:#555">Jan 21, 2026</div>
+    </div>
+    <div style="background:#100a18;border:1px solid #555;border-radius:8px;padding:10px 16px;flex:1;min-width:120px">
+      <div style="font-size:10px;color:#888;margin-bottom:3px">CURRENT (Mar 21)</div>
+      <div style="font-size:20px;font-weight:700;color:#eee">3:51:01</div>
+      <div style="font-size:10px;color:#555">9 min from peak</div>
+    </div>
+    <div style="background:#071207;border:1px solid #27ae60;border-radius:8px;padding:10px 16px;flex:1;min-width:120px">
+      <div style="font-size:10px;color:#27ae60;margin-bottom:3px">EVENT PROJECTION</div>
+      <div style="font-size:20px;font-weight:700;color:#eee">3:44:34</div>
+      <div style="font-size:10px;color:#555">Garmin · Ottawa May 24</div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:#555;margin-bottom:8px">Weekly samples — taller bar = faster predicted finish</div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:400px"><tbody><tr><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:45:05" style="background:#27ae60;width:100%;height:59px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Jan 01</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:50:12" style="background:#e74c3c;width:100%;height:29px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Jan 06</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:49:08" style="background:#f1c40f;width:100%;height:35px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Jan 11</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:44:05" style="background:#27ae60;width:100%;height:64px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Jan 16</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:43:11" style="background:#27ae60;width:100%;height:70px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Jan 21</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:44:50" style="background:#27ae60;width:100%;height:60px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Jan 26</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:46:29" style="background:#f1c40f;width:100%;height:51px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Jan 31</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:50:18" style="background:#e74c3c;width:100%;height:29px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Feb 05</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:53:02" style="background:#e74c3c;width:100%;height:13px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Feb 10</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:54:13" style="background:#e74c3c;width:100%;height:6px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Feb 15</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:54:33" style="background:#e74c3c;width:100%;height:4px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Feb 20</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:55:02" style="background:#e74c3c;width:100%;height:4px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Feb 25</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:55:24" style="background:#e74c3c;width:100%;height:4px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Mar 02</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:54:20" style="background:#e74c3c;width:100%;height:6px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Mar 07</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:52:38" style="background:#e74c3c;width:100%;height:15px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Mar 12</div></td><td style="vertical-align:bottom;text-align:center;padding:0 2px;width:6%"><div title="3:51:58" style="background:#e74c3c;width:100%;height:19px;border-radius:2px 2px 0 0;min-height:4px"></div><div style="font-size:8px;color:#555;margin-top:3px;white-space:nowrap">Mar 17</div></td></tr></tbody></table></div>
+  <div style="margin-top:4px;display:flex;justify-content:space-between;font-size:10px;color:#444">
+    <span>3:55 (slowest)</span><span style="color:#27ae60">3:42 (best)</span>
+  </div>
+  <div style="margin-top:12px;background:#100a18;border-left:3px solid #9b59b6;padding:8px 12px;font-size:12px;color:#888">
+    <strong style="color:#9b59b6">What this tells you:</strong> Fitness peaked Jan 21 (3:42) then declined during February ACWR spikes. The Feb 16 spike (ACWR 2.69) coincides exactly with the prediction worsening. Recovery is underway. Garmin's event projection accounts for expected training gains through May: <strong style="color:#eee">3:44:34 on race day.</strong>
+  </div>
+</div>
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#f1c40f;color:#f1c40f">📊 RUN CONSISTENCY — Monthly Run Count 2021–2026<span class="sec-chevron" style="color:#f1c40f">▼</span></div>
+  <div class="sec-body">
+<div style="background:#07080f;border:1px solid #2a2a0a;border-radius:10px;padding:16px 20px;margin-bottom:12px">
+  <div style="font-size:12px;color:#888;margin-bottom:12px">Runs per month — darker green = higher frequency</div>
+  <div style="overflow-x:auto"><table style="border-collapse:collapse;min-width:500px"><tbody><tr><td style="padding:4px 8px 4px 0;font-size:11px;font-weight:700;color:#3498db;white-space:nowrap">2021<span style="font-weight:400;color:#444;margin-left:6px">(8)</span></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jan</div><div style="font-size:13px;font-weight:700;color:#27ae60">2</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Feb</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Mar</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Apr</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">May</div><div style="font-size:13px;font-weight:700;color:#27ae60">2</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jun</div><div style="font-size:13px;font-weight:700;color:#27ae60">4</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jul</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Aug</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Sep</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Oct</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Nov</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Dec</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td></tr><tr><td style="padding:4px 8px 4px 0;font-size:11px;font-weight:700;color:#27ae60;white-space:nowrap">2022<span style="font-weight:400;color:#444;margin-left:6px">(0)</span></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jan</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Feb</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Mar</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Apr</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">May</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jun</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jul</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Aug</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Sep</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Oct</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Nov</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Dec</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td></tr><tr><td style="padding:4px 8px 4px 0;font-size:11px;font-weight:700;color:#e67e22;white-space:nowrap">2023<span style="font-weight:400;color:#444;margin-left:6px">(20)</span></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jan</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Feb</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Mar</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Apr</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">May</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jun</div><div style="font-size:13px;font-weight:700;color:#27ae60">2</div></div></td><td style="padding:3px;text-align:center"><div style="background:#073a07;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jul</div><div style="font-size:13px;font-weight:700;color:#58d68d">12</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0a2a0a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Aug</div><div style="font-size:13px;font-weight:700;color:#2ecc71">5</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Sep</div><div style="font-size:13px;font-weight:700;color:#27ae60">1</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Oct</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Nov</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Dec</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td></tr><tr><td style="padding:4px 8px 4px 0;font-size:11px;font-weight:700;color:#9b59b6;white-space:nowrap">2024<span style="font-weight:400;color:#444;margin-left:6px">(80)</span></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jan</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Feb</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Mar</div><div style="font-size:13px;font-weight:700;color:#27ae60">2</div></div></td><td style="padding:3px;text-align:center"><div style="background:#073a07;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Apr</div><div style="font-size:13px;font-weight:700;color:#58d68d">9</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0a2a0a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">May</div><div style="font-size:13px;font-weight:700;color:#2ecc71">8</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jun</div><div style="font-size:13px;font-weight:700;color:#7dcea0">17</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jul</div><div style="font-size:13px;font-weight:700;color:#7dcea0">18</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Aug</div><div style="font-size:13px;font-weight:700;color:#7dcea0">13</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0a2a0a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Sep</div><div style="font-size:13px;font-weight:700;color:#2ecc71">8</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Oct</div><div style="font-size:13px;font-weight:700;color:#27ae60">4</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Nov</div><div style="font-size:13px;font-weight:700;color:#27ae60">1</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Dec</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td></tr><tr><td style="padding:4px 8px 4px 0;font-size:11px;font-weight:700;color:#e74c3c;white-space:nowrap">2025<span style="font-weight:400;color:#444;margin-left:6px">(131)</span></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jan</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d0d1a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Feb</div><div style="font-size:13px;font-weight:700;color:#333">·</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0d1a0d;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Mar</div><div style="font-size:13px;font-weight:700;color:#27ae60">2</div></div></td><td style="padding:3px;text-align:center"><div style="background:#0a2a0a;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Apr</div><div style="font-size:13px;font-weight:700;color:#2ecc71">7</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">May</div><div style="font-size:13px;font-weight:700;color:#7dcea0">18</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jun</div><div style="font-size:13px;font-weight:700;color:#7dcea0">16</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jul</div><div style="font-size:13px;font-weight:700;color:#7dcea0">18</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Aug</div><div style="font-size:13px;font-weight:700;color:#7dcea0">15</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Sep</div><div style="font-size:13px;font-weight:700;color:#7dcea0">16</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Oct</div><div style="font-size:13px;font-weight:700;color:#7dcea0">14</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Nov</div><div style="font-size:13px;font-weight:700;color:#7dcea0">16</div></div></td><td style="padding:3px;text-align:center"><div style="background:#073a07;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Dec</div><div style="font-size:13px;font-weight:700;color:#58d68d">9</div></div></td></tr><tr><td style="padding:4px 8px 4px 0;font-size:11px;font-weight:700;color:#f1c40f;white-space:nowrap">2026<span style="font-weight:400;color:#444;margin-left:6px">(41)</span></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jan</div><div style="font-size:13px;font-weight:700;color:#7dcea0">13</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Feb</div><div style="font-size:13px;font-weight:700;color:#7dcea0">14</div></div></td><td style="padding:3px;text-align:center"><div style="background:#053005;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Mar</div><div style="font-size:13px;font-weight:700;color:#7dcea0">14</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Apr</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">May</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jun</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Jul</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Aug</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Sep</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Oct</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Nov</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td><td style="padding:3px;text-align:center"><div style="background:#090912;border-radius:4px;padding:4px 2px;min-width:32px"><div style="font-size:9px;color:#444">Dec</div><div style="font-size:13px;font-weight:700;color:#333">—</div></div></td></tr></tbody></table></div>
+  <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:16px;font-size:11px;color:#888">
+    <span>Total: <strong style="color:#eee">280 runs</strong></span>
+    <span>Peak month: <strong style="color:#eee">18 runs (Jul 2025)</strong></span>
+    <span>Average: <strong style="color:#eee">9 runs/month</strong></span>
+  </div>
+</div>
+  </div>
+</div>
+<div class="sec-wrap">
+  <div class="sec" style="border-color:#e74c3c;color:#e74c3c">💓 HEART RATE ZONE DISTRIBUTION — Training Intensity Profile<span class="sec-chevron" style="color:#e74c3c">▼</span></div>
+  <div class="sec-body">
+<div style="background:#07080f;border:1px solid #2a0a0a;border-radius:10px;padding:16px 20px;margin-bottom:12px">
+  <div style="font-size:12px;color:#888;margin-bottom:14px">241 runs with HR data · marathon ideal: 80% Z1/Z2 (easy), 20% Z3+</div>
+  <table style="width:100%;border-collapse:collapse">
+    <thead><tr style="border-bottom:1px solid #222">
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Zone</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Range</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Your %</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Ideal</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Gap</th>
+      <th style="padding:6px 10px;text-align:left;font-size:11px;color:#555;font-weight:400">Runs</th>
+    </tr></thead>
+    <tbody><tr style="border-bottom:1px solid #111"><td style="padding:8px 10px;font-size:12px;font-weight:700;color:#3498db;white-space:nowrap">Z1 Easy</td><td style="padding:8px 10px;font-size:11px;color:#555"><130 bpm</td><td style="padding:8px 16px;width:40%"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:#1a1a2e;border-radius:3px;height:10px"><div style="background:#3498db;height:100%;width:7%;border-radius:3px"></div></div><span style="font-size:12px;font-weight:700;color:#eee;min-width:38px">7.9%</span></div></td><td style="padding:8px 10px;font-size:11px;color:#555">Ideal: 20%</td><td style="padding:8px 10px;font-size:11px;color:#e74c3c">⚠ -12%</td><td style="padding:8px 10px;font-size:11px;color:#555">19 runs</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:8px 10px;font-size:12px;font-weight:700;color:#27ae60;white-space:nowrap">Z2 Aerobic</td><td style="padding:8px 10px;font-size:11px;color:#555">130–145 bpm</td><td style="padding:8px 16px;width:40%"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:#1a1a2e;border-radius:3px;height:10px"><div style="background:#27ae60;height:100%;width:53%;border-radius:3px"></div></div><span style="font-size:12px;font-weight:700;color:#eee;min-width:38px">53.9%</span></div></td><td style="padding:8px 10px;font-size:11px;color:#555">Ideal: 60%</td><td style="padding:8px 10px;font-size:11px;color:#888">-6%</td><td style="padding:8px 10px;font-size:11px;color:#555">130 runs</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:8px 10px;font-size:12px;font-weight:700;color:#f1c40f;white-space:nowrap">Z3 Tempo</td><td style="padding:8px 10px;font-size:11px;color:#555">145–160 bpm</td><td style="padding:8px 16px;width:40%"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:#1a1a2e;border-radius:3px;height:10px"><div style="background:#f1c40f;height:100%;width:35%;border-radius:3px"></div></div><span style="font-size:12px;font-weight:700;color:#eee;min-width:38px">35.7%</span></div></td><td style="padding:8px 10px;font-size:11px;color:#555">Ideal: 15%</td><td style="padding:8px 10px;font-size:11px;color:#e74c3c">⚠ +21%</td><td style="padding:8px 10px;font-size:11px;color:#555">86 runs</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:8px 10px;font-size:12px;font-weight:700;color:#e67e22;white-space:nowrap">Z4 Threshold</td><td style="padding:8px 10px;font-size:11px;color:#555">160–175 bpm</td><td style="padding:8px 16px;width:40%"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:#1a1a2e;border-radius:3px;height:10px"><div style="background:#e67e22;height:100%;width:2%;border-radius:3px"></div></div><span style="font-size:12px;font-weight:700;color:#eee;min-width:38px">2.5%</span></div></td><td style="padding:8px 10px;font-size:11px;color:#555">Ideal: 5%</td><td style="padding:8px 10px;font-size:11px;color:#888">-3%</td><td style="padding:8px 10px;font-size:11px;color:#555">6 runs</td></tr><tr style="border-bottom:1px solid #111"><td style="padding:8px 10px;font-size:12px;font-weight:700;color:#e74c3c;white-space:nowrap">Z5 Max</td><td style="padding:8px 10px;font-size:11px;color:#555">>175 bpm</td><td style="padding:8px 16px;width:40%"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:#1a1a2e;border-radius:3px;height:10px"><div style="background:#e74c3c;height:100%;width:0%;border-radius:3px"></div></div><span style="font-size:12px;font-weight:700;color:#eee;min-width:38px">0.0%</span></div></td><td style="padding:8px 10px;font-size:11px;color:#555">Ideal: 0%</td><td style="padding:8px 10px;font-size:11px;color:#888">0%</td><td style="padding:8px 10px;font-size:11px;color:#555">0 runs</td></tr></tbody>
+  </table>
+  <div style="margin-top:14px;background:#120707;border-left:3px solid #e74c3c;padding:10px 14px;font-size:12px;color:#888">
+    <strong style="color:#e74c3c">⚠ Key finding:</strong> 61.8% of runs are Z1/Z2 (easy). Marathon 80/20 rule calls for 80% easy — you are running <strong style="color:#eee">too hard too often.</strong> 35.7% of runs land in Z3 Tempo. This explains the ACWR spikes and accumulated fatigue. During the 9-week build: <strong style="color:#eee">slow your easy runs down.</strong>
+  </div>
+</div>
+  </div>
+</div>
+</div><!-- /container -->
+
+
+<script>
+document.querySelectorAll('.sec').forEach(sec => {
+  const wrap = sec.closest('.sec-wrap');
+  if (wrap) {
+    sec.addEventListener('click', () => wrap.classList.toggle('open'));
+  }
+});
+</script>
+
+</body>
+</html>
