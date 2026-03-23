@@ -10,11 +10,14 @@ repository root of `mgdufour.github.io`.
 
 ## Contents
 
-- `index.html` — the homepage for the site
-- `running_deep_insights.html` — deep running analytics page
+- `index.html` — the homepage for the site with links to projects
 - `commit-reverts.md` — notes and link history
 - `SECURITY_CHECKLIST.md` — security baseline, scan results, and CI policy
 - `reports/` — archived local Lighthouse HTML reports
+
+## Projects
+
+- **[Running Analysis](https://mgdufour.github.io/running-analysis/)** — standalone repository with deep running insights analytics page. Published via [mgdufour/running-analysis](https://github.com/mgdufour/running-analysis) GitHub Pages.
 
 ## Preview locally
 
