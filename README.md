@@ -11,8 +11,10 @@ repository root of `mgdufour.github.io`.
 ## Contents
 
 - `index.html` — the homepage for the site
+- `running_deep_insights.html` — deep running analytics page
 - `commit-reverts.md` — notes and link history
 - `SECURITY_CHECKLIST.md` — security baseline, scan results, and CI policy
+- `reports/` — archived local Lighthouse HTML reports
 
 ## Preview locally
 
